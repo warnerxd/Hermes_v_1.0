@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Vehículos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0060c2 0%,  #faf4ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="file"] {
+            padding: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .link {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .link:hover {
+            text-decoration: none;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vehiculos-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .vehiculo-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .vehiculo-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .vehiculo-info {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-edit {
+            flex: 1;
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-delete {
+            flex: 1;
+            background: #dc3545;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-edit:hover {
+            background: #218838;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .btn-descargar {
+            background: #007bff;
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+
+        .btn-descargar:hover {
+            background: #0056b3;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            width: auto;
+            padding: 8px 15px;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .small-btn {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PÁGINA 1: LOGIN -->
+        <div id="loginPage" class="page active">
+            <div class="header">
+                <h1>🚚 Gestor de Vehículos</h1>
+                <p>Acceso a tu cuenta</p>
+            </div>
+            <div class="content">
+                <div class="alert alert-success" id="alertSuccess"></div>
+                <div class="alert alert-error" id="alertError"></div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Contraseña</label>
+                        <input type="password" id="loginPassword" required placeholder="Tu contraseña">
+                    </div>
+                    <button type="submit">Iniciar Sesión</button>
+                </form>
+
+                <div class="link" onclick="irARegistro()">
+                    ¿No tienes cuenta? Registrarse aquí
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 2: REGISTRO -->
+        <div id="registroPage" class="page">
+            <div class="header">
+                <h1>🚚 Crear Cuenta</h1>
+                <p>Regístrate para empezar</p>
+            </div>
+            <div class="content">
+                <div class="alert alert-success" id="alertSuccess2"></div>
+                <div class="alert alert-error" id="alertError2"></div>
+
+                <form id="registroForm">
+                    <div class="form-group">
+                        <label for="registroNombre">Nombre Completo</label>
+                        <input type="text" id="registroNombre" required placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="registroEmail">Email</label>
+                        <input type="email" id="registroEmail" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="registroPassword">Contraseña</label>
+                        <input type="password" id="registroPassword" required placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <button type="submit">Crear Cuenta</button>
+                </form>
+
+                <div class="link" onclick="irALogin()">
+                    ¿Ya tienes cuenta? Inicia sesión aquí
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 3: REGISTRAR VEHÍCULO -->
+        <div id="registroVehiculoPage" class="page">
+            <div class="header">
+                <h1>🚚 Registrar Vehículo</h1>
+                <div class="user-info">
+                    <span id="usuarioNombre"></span>
+                    <button class="logout-btn small-btn" onclick="logout()">Salir</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="alert alert-success" id="alertSuccess3"></div>
+                <div class="alert alert-error" id="alertError3"></div>
+
+                <div class="nav-buttons">
+                    <button class="small-btn" onclick="irARegistroVehiculo()" style="background: #667eea;">Registrar</button>
+                    <button class="small-btn" onclick="irAVerVehiculos()">Ver Mis Vehículos</button>
+                </div>
+
+                <form id="vehiculoForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="placa">Placa</label>
+                            <input type="text" id="placa" required placeholder="ABC-123">
+                        </div>
+                        <div class="form-group">
+                            <label for="tonelaje">Tonelaje</label>
+                            <input type="text" id="tonelaje" required placeholder="5000 kg">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proveedor">Proveedor</label>
+                        <input type="text" id="proveedor" required placeholder="Nombre del proveedor">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pdf">Adjuntar PDF</label>
+                        <input type="file" id="pdf" accept=".pdf" placeholder="Seleccionar archivo PDF">
+                    </div>
+
+                    <button type="submit">Registrar Vehículo</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PÁGINA 4: VER VEHÍCULOS -->
+        <div id="verVehiculosPage" class="page">
+            <div class="header">
+                <h1>🚚 Mis Vehículos</h1>
+                <div class="user-info">
+                    <span id="usuarioNombre2"></span>
+                    <button class="logout-btn small-btn" onclick="logout()">Salir</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="nav-buttons">
+                    <button class="small-btn" onclick="irARegistroVehiculo()">Registrar</button>
+                    <button class="small-btn" onclick="irAVerVehiculos()" style="background: #667eea;">Ver Mis Vehículos</button>
+                </div>
+
+                <button onclick="refrescarVehiculos()" style="margin-bottom: 20px;">🔄 Actualizar</button>
+                <div id="vehiculosGrid" class="vehiculos-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let usuarioActual = null;
+
+        // ==================== Cambios de página ====================
+
+        function irARegistro() {
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('registroPage').classList.add('active');
+        }
+
+        function irALogin() {
+            document.getElementById('registroPage').classList.remove('active');
+            document.getElementById('loginPage').classList.add('active');
+        }
+
+        function irARegistroVehiculo() {
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('registroPage').classList.remove('active');
+            document.getElementById('verVehiculosPage').classList.remove('active');
+            document.getElementById('registroVehiculoPage').classList.add('active');
+        }
+
+        function irAVerVehiculos() {
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('registroPage').classList.remove('active');
+            document.getElementById('registroVehiculoPage').classList.remove('active');
+            document.getElementById('verVehiculosPage').classList.add('active');
+            cargarVehiculos();
+        }
+
+        function logout() {
+            usuarioActual = null;
+            localStorage.removeItem('usuario');
+            document.getElementById('registroVehiculoPage').classList.remove('active');
+            document.getElementById('verVehiculosPage').classList.remove('active');
+            document.getElementById('loginPage').classList.add('active');
+            limpiarFormularios();
+        }
+
+        // ==================== Login ====================
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const contraseña = document.getElementById('loginPassword').value;
+
+            fetch(API_URL + '/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, contraseña })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    mostrarAlerta(data.error, 'error', 'alertError');
+                } else {
+                    usuarioActual = data;
+                    localStorage.setItem('usuario', JSON.stringify(data));
+                    document.getElementById('usuarioNombre').textContent = 'Bienvenido, ' + data.nombre;
+                    document.getElementById('usuarioNombre2').textContent = 'Bienvenido, ' + data.nombre;
+                    irARegistroVehiculo();
+                    document.getElementById('loginForm').reset();
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                mostrarAlerta('Error al conectar', 'error', 'alertError');
+            });
+        });
+
+        // ==================== Registro ====================
+
+        document.getElementById('registroForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById('registroNombre').value;
+            const email = document.getElementById('registroEmail').value;
+            const contraseña = document.getElementById('registroPassword').value;
+
+            if (contraseña.length < 6) {
+                mostrarAlerta('La contraseña debe tener al menos 6 caracteres', 'error', 'alertError2');
+                return;
+            }
+
+            fetch(API_URL + '/auth/registro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, nombre, contraseña })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    mostrarAlerta(data.error, 'error', 'alertError2');
+                } else {
+                    mostrarAlerta('✅ Cuenta creada. Inicia sesión ahora.', 'success', 'alertSuccess2');
+                    document.getElementById('registroForm').reset();
+                    setTimeout(() => irALogin(), 2000);
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                mostrarAlerta('Error al registrar', 'error', 'alertError2');
+            });
+        });
+
+        // ==================== Vehículos ====================
+
+        document.getElementById('vehiculoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const placa = document.getElementById('placa').value;
+            const tonelaje = document.getElementById('tonelaje').value;
+            const proveedor = document.getElementById('proveedor').value;
+            const pdfFile = document.getElementById('pdf').files[0];
+
+            const vehiculo = {
+                placa: placa.toUpperCase(),
+                tonelaje: tonelaje,
+                proveedor: proveedor
+            };
+
+            fetch(API_URL + '/vehiculos?usuario_id=' + usuarioActual.id, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(vehiculo)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    mostrarAlerta(data.error, 'error', 'alertError3');
+                } else {
+                    mostrarAlerta('✅ Vehículo registrado exitosamente', 'success', 'alertSuccess3');
+                    document.getElementById('vehiculoForm').reset();
+                    
+                    // Guardar PDF si fue seleccionado
+                    if (pdfFile) {
+                        guardarPDF(data.vehiculo.id, pdfFile);
+                    } else {
+                        setTimeout(() => irAVerVehiculos(), 1500);
+                    }
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                mostrarAlerta('Error al registrar vehículo', 'error', 'alertError3');
+            });
+        });
+
+        function guardarPDF(vehiculoId, pdfFile) {
+            const formData = new FormData();
+            formData.append('file', pdfFile);
+            
+            fetch(API_URL + '/upload-pdf?vehiculo_id=' + vehiculoId, {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    mostrarAlerta('⚠️ Vehículo creado pero no se pudo guardar el PDF: ' + data.error, 'error', 'alertError3');
+                } else {
+                    mostrarAlerta('✅ PDF guardado exitosamente', 'success', 'alertSuccess3');
+                }
+                setTimeout(() => irAVerVehiculos(), 1500);
+            })
+            .catch(e => {
+                console.error(e);
+                mostrarAlerta('⚠️ Vehículo creado pero hubo problema con el PDF', 'error', 'alertError3');
+                setTimeout(() => irAVerVehiculos(), 1500);
+            });
+        }
+
+        function cargarVehiculos() {
+            fetch(API_URL + '/vehiculos/' + usuarioActual.id)
+                .then(r => r.json())
+                .then(data => {
+                    const grid = document.getElementById('vehiculosGrid');
+                    if (!data.vehiculos || data.vehiculos.length === 0) {
+                        grid.innerHTML = '<div class="empty-message">No tienes vehículos registrados. ¡Agrega uno!</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.vehiculos.forEach(v => {
+                        html += '<div class="vehiculo-card">';
+                        html += '<h3>📄 ' + v.placa + '</h3>';
+                        html += '<div class="vehiculo-info"><strong>Tonelaje:</strong> ' + v.tonelaje + '</div>';
+                        html += '<div class="vehiculo-info"><strong>Proveedor:</strong> ' + v.proveedor + '</div>';
+                        html += '<div class="vehiculo-info"><strong>Registrado:</strong> ' + new Date(v.fecha_creacion).toLocaleDateString('es-ES') + '</div>';
+                        if (v.pdf_ruta) {
+                            html += '<div class="vehiculo-info"><strong>📄 Ver PDF:</strong> <a href="' + API_URL + v.pdf_ruta + '" target="_blank" class="btn-descargar" style="display:inline-block;">Descargar</a></div>';
+                        } else {
+                            html += '<div class="vehiculo-info"><strong>PDF:</strong> <span style="color:#999;">No adjuntado</span></div>';
+                        }
+                        html += '<div class="card-buttons">';
+                        html += '<button class="btn-edit" onclick="editarVehiculo(' + v.id + ')">✏️ Editar</button>';
+                        html += '<button class="btn-delete" onclick="eliminarVehiculo(' + v.id + ')">🗑️ Eliminar</button>';
+                        html += '</div></div>';
+                    });
+                    grid.innerHTML = html;
+                })
+                .catch(e => {
+                    console.error(e);
+                    mostrarAlerta('Error al cargar vehículos', 'error');
+                });
+        }
+
+        function refrescarVehiculos() {
+            cargarVehiculos();
+            mostrarAlerta('✅ Actualizado', 'success');
+        }
+
+        function eliminarVehiculo(id) {
+            if (confirm('¿Eliminar este vehículo?')) {
+                fetch(API_URL + '/vehiculos/' + id, { method: 'DELETE' })
+                    .then(r => r.json())
+                    .then(data => {
+                        mostrarAlerta('✅ Vehículo eliminado', 'success');
+                        cargarVehiculos();
+                    })
+                    .catch(e => {
+                        mostrarAlerta('Error al eliminar', 'error');
+                    });
+            }
+        }
+
+        function editarVehiculo(id) {
+            alert('Función de edición próximamente');
+        }
+
+        // ==================== Utilidades ====================
+
+        function mostrarAlerta(mensaje, tipo, elementId = null) {
+            let alertElement;
+            if (elementId) {
+                alertElement = document.getElementById(elementId);
+            } else {
+                // Buscar el primer alert disponible
+                alertElement = document.querySelector('.alert');
+            }
+            
+            if (alertElement) {
+                alertElement.textContent = mensaje;
+                alertElement.className = 'alert alert-' + tipo;
+                alertElement.style.display = 'block';
+                setTimeout(() => alertElement.style.display = 'none', 5000);
+            }
+        }
+
+        function limpiarFormularios() {
+            document.getElementById('loginForm').reset();
+            document.getElementById('registroForm').reset();
+            document.getElementById('vehiculoForm').reset();
+        }
+
+        // Verificar si hay usuario guardado
+        window.addEventListener('load', function() {
+            const usuarioGuardado = localStorage.getItem('usuario');
+            if (usuarioGuardado) {
+                usuarioActual = JSON.parse(usuarioGuardado);
+                document.getElementById('usuarioNombre').textContent = 'Bienvenido, ' + usuarioActual.nombre;
+                document.getElementById('usuarioNombre2').textContent = 'Bienvenido, ' + usuarioActual.nombre;
+                irARegistroVehiculo();
+            }
+        });
+    </script>
+</body>
+</html>

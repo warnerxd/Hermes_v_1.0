@@ -1,0 +1,29 @@
+# Entornos virtuales
+venv/
+.venv/
+venv_linux/
+venv_api/
+
+# Python
+__pycache__/
+*.pyc
+*.save
+
+# Variables de entorno (NO subir al repo)
+.env
+
+# Base de datos local
+*.db
+
+# Archivos subidos
+uploads/
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+.vscode/
+venv_linux/
+
+.claude/

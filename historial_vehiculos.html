@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Vehículos - Sistema de Gestión de Vehículos</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+        :root {
+            --azul:       #1a4bcc;
+            --azul-dark:  #0f2d8a;
+            --azul-mid:   #2158e0;
+            --rojo:       #c0272d;
+            --rojo-dark:  #8e1a1f;
+            --verde:      #0f9b6e;
+            --naranja:    #d46b08;
+            --blanco:     #ffffff;
+            --gris-claro: #f4f6fb;
+            --gris-texto: #3a4560;
+            --gris-input: #e8ecf5;
+            --dur:        0.28s;
+            --ease:       cubic-bezier(0.4,0,0.2,1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse 90% 70% at 20% 10%, rgba(26,75,204,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 85% 80%, rgba(33,88,224,0.08) 0%, transparent 50%),
+                #e8ecf5;
+            padding: 24px 20px 40px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ══ HEADER ══ */
+        .header {
+            background: linear-gradient(140deg, rgba(26,75,204,0.92) 0%, rgba(15,45,138,0.97) 100%);
+            backdrop-filter: blur(20px) saturate(1.5);
+            -webkit-backdrop-filter: blur(20px) saturate(1.5);
+            border-radius: 20px;
+            padding: 26px 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            box-shadow: 0 12px 40px rgba(15,45,138,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 14px; }
+
+        .header-icon {
+            width: 46px; height: 46px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .header-title h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.65em;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.03em;
+            line-height: 1.1;
+        }
+        .header-title p {
+            font-size: 0.82em;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 14px; }
+
+        #usuarioNombre {
+            font-size: 0.88em;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.12);
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+
+        .logout-btn {
+            background: rgba(192,39,45,0.75);
+            color: white;
+            padding: 8px 18px;
+            border: 1.5px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 600;
+            font-size: 0.87em;
+            transition: all var(--dur) var(--ease);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .logout-btn:hover {
+            background: rgba(142,26,31,0.85);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(192,39,45,0.3);
+        }
+
+        /* ══ CONTENT CARD ══ */
+        .content-card {
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-radius: 20px;
+            border: 1.5px solid rgba(26,75,204,0.10);
+            padding: 28px 28px 32px;
+            box-shadow: 0 8px 32px rgba(26,75,204,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        /* ══ NAV ══ */
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .nav-btn {
+            padding: 13px 10px;
+            border: 1.5px solid rgba(26,75,204,0.18);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.52);
+            backdrop-filter: blur(12px) saturate(1.4);
+            -webkit-backdrop-filter: blur(12px) saturate(1.4);
+            font-family: 'Barlow', sans-serif;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--gris-texto);
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            box-shadow: 0 2px 8px rgba(26,75,204,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.72);
+            border-color: rgba(26,75,204,0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(26,75,204,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .nav-btn.active {
+            background: rgba(26,75,204,0.10);
+            border-color: var(--azul);
+            color: var(--azul);
+            box-shadow: 0 0 0 3px rgba(26,75,204,0.12), 0 4px 14px rgba(26,75,204,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* ══ ALERTS ══ */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            display: none;
+            font-size: 0.88em;
+            font-weight: 600;
+        }
+        .alert-success {
+            background: rgba(15,155,110,0.10);
+            border: 1px solid rgba(15,155,110,0.28);
+            color: #0a6b50;
+        }
+        .alert-error {
+            background: rgba(192,39,45,0.08);
+            border: 1px solid rgba(192,39,45,0.22);
+            color: #9f1239;
+        }
+
+        /* ══ LAYOUT PRINCIPAL ══ */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* ══ COLUMNA IZQUIERDA ══ */
+        .selector-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+        .search-box span {
+            position: absolute;
+            left: 11px; top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 0.9em;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 9px 12px 9px 32px;
+            border: 1.5px solid var(--gris-input);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.84em;
+            color: var(--gris-texto);
+            background: rgba(255,255,255,0.70);
+            transition: border-color 0.22s, box-shadow 0.22s, background 0.18s;
+        }
+        .search-box input:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--azul);
+            box-shadow: 0 0 0 3px rgba(26,75,204,0.10);
+        }
+        .search-box input::placeholder { color: #aab0c6; }
+
+        #selectorCount {
+            color: #aab0c6;
+            text-align: right;
+            font-size: 0.72rem;
+            display: block;
+            min-height: 1em;
+        }
+
+        .vehicle-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ══ TARJETA SELECTOR ══ */
+        .vehicle-card-select {
+            padding: 16px;
+            border: 1.5px solid rgba(26,75,204,0.14);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            background: rgba(255,255,255,0.60);
+            backdrop-filter: blur(12px) saturate(1.4);
+            -webkit-backdrop-filter: blur(12px) saturate(1.4);
+            box-shadow: 0 2px 8px rgba(26,75,204,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+            position: relative;
+        }
+        .vehicle-card-select:hover {
+            border-color: rgba(26,75,204,0.38);
+            background: rgba(255,255,255,0.78);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(26,75,204,0.11), inset 0 1px 0 rgba(255,255,255,0.85);
+        }
+        .vehicle-card-select.active {
+            border-color: var(--azul);
+            background: rgba(26,75,204,0.07);
+            box-shadow: 0 0 0 3px rgba(26,75,204,0.12), 0 6px 18px rgba(26,75,204,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .vehicle-card-select.en-revision {
+            border-color: rgba(212,107,8,0.28);
+            background: rgba(254,243,199,0.45);
+        }
+        .vehicle-card-select.en-revision:hover {
+            border-color: rgba(212,107,8,0.48);
+            background: rgba(254,243,199,0.62);
+        }
+        .vehicle-card-select.en-revision.active {
+            border-color: var(--naranja);
+            box-shadow: 0 0 0 3px rgba(212,107,8,0.14), 0 6px 18px rgba(212,107,8,0.10);
+        }
+
+        .vehicle-card-select h3 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--gris-texto);
+            letter-spacing: 0.04em;
+            margin: 0;
+        }
+
+        /* Badge count for multiple correctivos */
+        .corr-count-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #d46b08;
+            color: #fff;
+            font-size: 0.65em;
+            font-weight: 800;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        /* ── Modal historial correctivos ── */
+        #modalCorrHist .modal-header {
+            background: linear-gradient(140deg, rgba(212,107,8,0.88) 0%, rgba(160,70,0,0.96) 100%);
+        }
+        .corr-hist-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .corr-hist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(212,107,8,0.06);
+            border: 1px solid rgba(212,107,8,0.20);
+            border-radius: 10px;
+            padding: 11px 14px;
+        }
+        .corr-hist-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: 1.1em;
+            color: #d46b08;
+            min-width: 28px;
+        }
+        .corr-hist-info { flex: 1; min-width: 0; }
+        .corr-hist-fecha {
+            font-size: 0.78em;
+            color: #8a94b0;
+            margin-top: 2px;
+        }
+        .corr-hist-acciones { display: flex; gap: 6px; }
+        .btn-corr-ver {
+            padding: 6px 12px;
+            background: rgba(26,75,204,0.72);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.82em;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+        .btn-corr-ver:hover { background: rgba(15,45,138,0.85); }
+        .btn-corr-del {
+            padding: 6px 10px;
+            background: rgba(192,39,45,0.72);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.82em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-corr-del:hover { background: rgba(142,26,31,0.85); }
+        .corr-hist-empty {
+            text-align: center;
+            color: #9aa0b8;
+            font-size: 0.88em;
+            padding: 20px 0;
+        }
+
+        /* Correctivo banner */
+        .corr-banner {
+            background: rgba(212,107,8,0.10);
+            border: 1px solid rgba(212,107,8,0.28);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.70em;
+            font-weight: 700;
+            color: #92460a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.02em;
+        }
+
+        .vehicle-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.86em;
+            margin-top: 8px;
+        }
+        .detail-row { color: var(--gris-texto); line-height: 1.35; }
+        .detail-row strong {
+            display: block;
+            font-size: 0.72em;
+            font-weight: 700;
+            color: var(--azul);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 1px;
+        }
+
+        /* chips docs */
+        .chips-docs {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            font-size: 0.68rem;
+            padding: 2px 9px;
+            border-radius: 99px;
+            font-weight: 700;
+        }
+
+        /* ══ COLUMNA DERECHA — HISTORIAL ══ */
+        .historial-section { display: flex; flex-direction: column; gap: 16px; }
+
+        .historial-container { display: none; }
+        .historial-container.active { display: block; }
+
+        .historial-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.45em;
+            font-weight: 700;
+            color: var(--gris-texto);
+            letter-spacing: 0.03em;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(26,75,204,0.15);
+        }
+
+        .add-month-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: rgba(15,155,110,0.75);
+            color: white;
+            border: 1.5px solid rgba(255,255,255,0.20);
+            border-radius: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 700;
+            font-size: 0.88em;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 14px rgba(15,155,110,0.18), inset 0 1px 0 rgba(255,255,255,0.2);
+            margin-bottom: 18px;
+        }
+        .add-month-btn:hover {
+            background: rgba(10,107,80,0.84);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(15,155,110,0.26);
+        }
+
+        /* ══ TABLA HISTORIAL ══ */
+        .historial-headers {
+            display: grid;
+            grid-template-columns: 0.8fr 1fr 1.2fr 1.2fr 1.2fr 0.6fr;
+            gap: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 0.82em;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: white;
+            background: linear-gradient(140deg, rgba(26,75,204,0.88) 0%, rgba(15,45,138,0.94) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 13px 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 14px rgba(26,75,204,0.18);
+        }
+
+        .historial-row {
+            display: grid;
+            grid-template-columns: 0.8fr 1fr 1.2fr 1.2fr 1.2fr 0.6fr;
+            gap: 10px;
+            align-items: center;
+            padding: 13px 16px;
+            border: 1.5px solid rgba(26,75,204,0.10);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.60);
+            backdrop-filter: blur(10px) saturate(1.3);
+            -webkit-backdrop-filter: blur(10px) saturate(1.3);
+            transition: all var(--dur) var(--ease);
+            box-shadow: 0 2px 8px rgba(26,75,204,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .historial-row:hover {
+            background: rgba(255,255,255,0.78);
+            box-shadow: 0 5px 16px rgba(26,75,204,0.09), inset 0 1px 0 rgba(255,255,255,0.9);
+            transform: translateY(-1px);
+        }
+
+        .historial-row.row-completo {
+            border-color: rgba(16,185,129,0.22);
+            border-left: 4px solid #10b981;
+        }
+        .historial-row.row-parcial {
+            border-color: rgba(245,158,11,0.22);
+            border-left: 4px solid #f59e0b;
+        }
+        .historial-row.row-vacio {
+            border-color: rgba(192,39,45,0.18);
+            border-left: 4px solid rgba(192,39,45,0.6);
+        }
+
+        .mes-año {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            color: var(--gris-texto);
+            font-size: 0.95em;
+            letter-spacing: 0.02em;
+        }
+        .mes-año strong { display: block; font-size: 1.05em; }
+
+        .descripcion { color: #7a84a0; font-size: 0.87em; }
+
+        .pdf-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Botones pequeños */
+        .btn-small {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.78em;
+            cursor: pointer;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 700;
+            transition: all var(--dur) var(--ease);
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1.5px solid transparent;
+        }
+        .btn-descargar {
+            background: rgba(26,75,204,0.72);
+            color: white;
+            border-color: rgba(255,255,255,0.16);
+            box-shadow: 0 2px 6px rgba(26,75,204,0.18);
+        }
+        .btn-descargar:hover {
+            background: rgba(15,45,138,0.82);
+            transform: translateY(-1px);
+        }
+        .btn-subir {
+            background: rgba(170,176,198,0.18);
+            color: #9aa0b8;
+            border-color: rgba(170,176,198,0.25);
+            box-shadow: none;
+        }
+        .btn-subir:hover {
+            background: rgba(170,176,198,0.30);
+            color: #6b7591;
+            transform: translateY(-1px);
+        }
+        .btn-delete {
+            background: rgba(192,39,45,0.72);
+            color: white;
+            border-color: rgba(255,255,255,0.14);
+            box-shadow: 0 2px 6px rgba(192,39,45,0.16);
+        }
+        .btn-delete:hover {
+            background: rgba(142,26,31,0.82);
+            transform: translateY(-1px);
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 48px 32px;
+            color: #aab0c6;
+            font-size: 0.95em;
+            background: rgba(255,255,255,0.55);
+            border-radius: 14px;
+            border: 1.5px solid rgba(26,75,204,0.08);
+        }
+
+        /* ══ MODALES ══ */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,45,138,0.38);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(24px) saturate(1.8);
+            -webkit-backdrop-filter: blur(24px) saturate(1.8);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 24px 70px rgba(15,45,138,0.28), inset 0 1px 0 rgba(255,255,255,0.9);
+            border: 1.5px solid rgba(26,75,204,0.14);
+            overflow: hidden;
+            animation: slideUpM 0.25s var(--ease);
+        }
+        @keyframes slideUpM {
+            from { opacity:0; transform:translateY(22px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            background: linear-gradient(140deg, rgba(26,75,204,0.88) 0%, rgba(15,45,138,0.94) 100%);
+            color: white;
+            padding: 18px 22px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.15em;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .modal-body { padding: 22px; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #8a94b0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--gris-input);
+            border-radius: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.92em;
+            color: var(--gris-texto);
+            background: rgba(255,255,255,0.72);
+            transition: border-color 0.22s, box-shadow 0.22s, background 0.18s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--azul);
+            box-shadow: 0 0 0 3px rgba(26,75,204,0.10);
+        }
+
+        #tipoPDFDisplay {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--azul);
+            letter-spacing: 0.04em;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 14px 22px;
+            border-top: 1px solid rgba(26,75,204,0.08);
+        }
+        .btn-modal {
+            flex: 1;
+            padding: 12px;
+            border-radius: 9px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1em;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            transition: all var(--dur) var(--ease);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .btn-modal.primary {
+            background: rgba(26,75,204,0.76);
+            color: white;
+            border-color: rgba(255,255,255,0.18);
+            box-shadow: 0 4px 14px rgba(26,75,204,0.22), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+        .btn-modal.primary:hover {
+            background: rgba(15,45,138,0.86);
+            transform: translateY(-1px);
+            box-shadow: 0 7px 20px rgba(26,75,204,0.30);
+        }
+        .btn-modal.secondary {
+            background: rgba(255,255,255,0.62);
+            color: var(--gris-texto);
+            border-color: rgba(26,75,204,0.14);
+        }
+        .btn-modal.secondary:hover {
+            background: rgba(255,255,255,0.88);
+            transform: translateY(-1px);
+        }
+
+        /* ══ MODAL CONFIRMAR ELIMINAR ══ */
+        .modal-confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,45,138,0.38);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-confirm-overlay.active {
+            display: flex;
+        }
+        .modal-confirm-box {
+            background: rgba(255,255,255,0.94);
+            backdrop-filter: blur(24px) saturate(1.8);
+            -webkit-backdrop-filter: blur(24px) saturate(1.8);
+            border-radius: 20px;
+            width: 92%;
+            max-width: 420px;
+            box-shadow: 0 24px 70px rgba(15,45,138,0.28), inset 0 1px 0 rgba(255,255,255,0.9);
+            border: 1.5px solid rgba(192,39,45,0.18);
+            overflow: hidden;
+            animation: slideUpM 0.25s var(--ease);
+        }
+        .modal-confirm-header {
+            background: linear-gradient(140deg, rgba(192,39,45,0.88) 0%, rgba(142,26,31,0.96) 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-confirm-header span {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .modal-confirm-close {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.22);
+            color: white;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .modal-confirm-close:hover { background: rgba(255,255,255,0.28); }
+        .modal-confirm-body {
+            padding: 22px 22px 8px;
+        }
+        .modal-confirm-vehiculo {
+            background: rgba(192,39,45,0.06);
+            border: 1px solid rgba(192,39,45,0.18);
+            border-radius: 10px;
+            padding: 11px 16px;
+            font-size: 0.92em;
+            color: var(--gris-texto);
+            margin-bottom: 14px;
+        }
+        .modal-confirm-vehiculo strong { color: var(--rojo); }
+        .modal-confirm-aviso {
+            background: rgba(245,158,11,0.07);
+            border: 1px solid rgba(245,158,11,0.28);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 0.83em;
+            color: #78480a;
+            line-height: 1.55;
+            margin-bottom: 6px;
+        }
+        .modal-confirm-footer {
+            display: flex;
+            gap: 10px;
+            padding: 16px 22px;
+        }
+        .btn-confirm-cancel {
+            flex: 1;
+            padding: 11px;
+            background: rgba(255,255,255,0.65);
+            color: var(--gris-texto);
+            border: 1.5px solid rgba(26,75,204,0.14);
+            border-radius: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 600;
+            font-size: 0.92em;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+        }
+        .btn-confirm-cancel:hover {
+            background: rgba(255,255,255,0.90);
+            transform: translateY(-1px);
+        }
+        .btn-confirm-ok {
+            flex: 2;
+            padding: 11px;
+            background: rgba(192,39,45,0.82);
+            color: white;
+            border: 1.5px solid rgba(255,255,255,0.16);
+            border-radius: 9px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1em;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            box-shadow: 0 4px 14px rgba(192,39,45,0.22), inset 0 1px 0 rgba(255,255,255,0.14);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-confirm-ok:hover {
+            background: rgba(142,26,31,0.90);
+            transform: translateY(-1px);
+            box-shadow: 0 7px 20px rgba(192,39,45,0.30);
+        }
+
+        /* ══ RESPONSIVE ══ */
+        @media (max-width: 1024px) {
+            .main-content { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 14px 12px 30px; }
+            .header { flex-direction: column; gap: 14px; text-align: center; padding: 20px 18px; }
+            .header-right { justify-content: center; }
+            .nav-buttons { grid-template-columns: 1fr; }
+            /* Ocultar tabla desktop en móvil */
+            .historial-headers { display: none; }
+            .historial-row     { display: none; }
+        }
+
+        /* ══ TARJETA MES (móvil) ══ */
+        .mes-card {
+            display: none; /* solo visible en móvil */
+            background: rgba(255,255,255,0.75);
+            border: 1.5px solid rgba(26,75,204,0.12);
+            border-radius: 16px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(26,75,204,0.07);
+        }
+        .mes-card.row-completo { border-left: 5px solid #10b981; }
+        .mes-card.row-parcial  { border-left: 5px solid #f59e0b; }
+        .mes-card.row-vacio    { border-left: 5px solid rgba(192,39,45,0.55); }
+
+        .mes-card-header {
+            background: linear-gradient(140deg, rgba(26,75,204,0.88) 0%, rgba(15,45,138,0.94) 100%);
+            padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .mes-card-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.2em; font-weight: 800; color: white;
+            letter-spacing: 0.04em;
+        }
+        .mes-card-estado {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .mes-card-estado-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+        }
+        .mes-card-estado-label {
+            font-size: 0.76em; font-weight: 700; color: rgba(255,255,255,0.85);
+        }
+        .mes-card-desc {
+            padding: 8px 18px;
+            font-size: 0.82em; color: #8a94b0;
+            border-bottom: 1px solid rgba(26,75,204,0.07);
+        }
+
+        /* Zona de doc individual */
+        .doc-zona {
+            display: flex; align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(26,75,204,0.06);
+            gap: 14px;
+            transition: background 0.2s;
+        }
+        .doc-zona:last-of-type { border-bottom: none; }
+        .doc-zona-icono {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3em; flex-shrink: 0;
+        }
+        .doc-zona-icono.preop { background: rgba(26,75,204,0.10); }
+        .doc-zona-icono.mant  { background: rgba(15,155,110,0.10); }
+        .doc-zona-icono.corr  { background: rgba(212,107,8,0.10); }
+
+        .doc-zona-info { flex: 1; min-width: 0; }
+        .doc-zona-nombre {
+            font-weight: 700; font-size: 0.90em; color: var(--gris-texto);
+            margin-bottom: 2px;
+        }
+        .doc-zona-sub {
+            font-size: 0.73em; color: #8a94b0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .doc-zona-sub.ok { color: #065f46; }
+
+        /* Botón subir — zona de toque grande */
+        .btn-doc-subir {
+            display: flex; align-items: center; gap: 6px;
+            padding: 10px 16px;
+            background: rgba(26,75,204,0.08);
+            color: var(--azul);
+            border: 1.5px dashed rgba(26,75,204,0.30);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 0.84em;
+            cursor: pointer; white-space: nowrap;
+            transition: all 0.22s;
+            flex-shrink: 0;
+        }
+        .btn-doc-subir:active { background: rgba(26,75,204,0.16); transform: scale(0.97); }
+
+        /* Botón descargar/eliminar — estado cargado */
+        .doc-zona-acciones { display: flex; gap: 7px; flex-shrink: 0; }
+        .btn-doc-ver {
+            display: flex; align-items: center; gap: 5px;
+            padding: 9px 13px;
+            background: rgba(15,155,110,0.88); color: white;
+            border: none; border-radius: 9px;
+            font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 0.82em;
+            cursor: pointer; text-decoration: none; white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .btn-doc-ver:active { background: rgba(10,107,80,0.95); transform: scale(0.97); }
+        .btn-doc-del {
+            display: flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px;
+            background: rgba(192,39,45,0.10); color: var(--rojo);
+            border: 1.5px solid rgba(192,39,45,0.22); border-radius: 9px;
+            font-size: 1em; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-doc-del:active { background: rgba(192,39,45,0.22); transform: scale(0.97); }
+
+        /* Footer tarjeta: eliminar mes */
+        .mes-card-footer {
+            padding: 10px 18px;
+            background: rgba(248,249,251,0.6);
+            border-top: 1px solid rgba(26,75,204,0.07);
+            display: flex; justify-content: flex-end;
+        }
+        .btn-del-mes {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 14px;
+            background: rgba(192,39,45,0.08); color: #9f1239;
+            border: 1.5px solid rgba(192,39,45,0.18); border-radius: 8px;
+            font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 0.80em;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-del-mes:active { background: rgba(192,39,45,0.18); }
+
+        @media (max-width: 768px) {
+            .mes-card { display: block; }
+        }
+
+        /* ══ UPLOAD MODAL MEJORADO ══ */
+        .upload-drop-zone {
+            border: 2.5px dashed rgba(26,75,204,0.30);
+            border-radius: 14px;
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: rgba(26,75,204,0.03);
+            position: relative;
+        }
+        .upload-drop-zone:hover,
+        .upload-drop-zone.drag-over {
+            border-color: var(--azul);
+            background: rgba(26,75,204,0.07);
+        }
+        .upload-drop-zone input[type=file] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+        }
+        .upload-drop-icon { font-size: 2.2em; margin-bottom: 8px; }
+        .upload-drop-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1em; font-weight: 700; color: var(--azul); margin-bottom: 4px;
+        }
+        .upload-drop-sub { font-size: 0.78em; color: #8a94b0; }
+        .upload-file-preview {
+            display: none; align-items: center; gap: 10px;
+            background: rgba(15,155,110,0.07);
+            border: 1.5px solid rgba(15,155,110,0.22);
+            border-radius: 10px; padding: 12px 14px;
+            margin-top: 12px;
+        }
+        .upload-file-preview.visible { display: flex; }
+        .upload-file-name {
+            font-size: 0.84em; font-weight: 700; color: #065f46;
+            flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .upload-file-clear {
+            background: none; border: none; color: #8a94b0;
+            cursor: pointer; font-size: 1em; padding: 2px 4px;
+            transition: color 0.2s; flex-shrink: 0;
+        }
+        .upload-file-clear:hover { color: var(--rojo); }
+        .upload-tipo-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(26,75,204,0.08);
+            border: 1.5px solid rgba(26,75,204,0.18);
+            border-radius: 10px; padding: 9px 16px;
+            margin-bottom: 16px;
+        }
+        .upload-tipo-icon { font-size: 1.3em; }
+        .upload-tipo-text {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.05em; font-weight: 700; color: var(--azul); letter-spacing: 0.03em;
+        }
+
+        /* ══ CASCADA DÍAS PREOPERACIONAL ══ */
+        .dias-toggle {
+            display: flex; align-items: center; gap: 7px;
+            padding: 6px 12px;
+            background: rgba(26,75,204,0.08);
+            border: 1.5px solid rgba(26,75,204,0.18);
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 0.78em;
+            color: var(--azul); cursor: pointer; white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .dias-toggle:hover { background: rgba(26,75,204,0.16); }
+
+        .dias-cascada {
+            display: none;
+            background: rgba(26,75,204,0.025);
+            border: 1.5px solid rgba(26,75,204,0.10);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        .dias-cascada.open { display: block; }
+        .dias-cascada-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.82em; font-weight: 700; color: #8a94b0;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+        .dias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+            gap: 6px;
+        }
+        .dia-cell {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; padding: 6px 4px;
+            border-radius: 9px; border: 1.5px solid transparent;
+            font-size: 0.72em; font-weight: 700; cursor: default;
+            transition: transform 0.15s;
+        }
+        .dia-cell.hecho {
+            background: rgba(15,155,110,0.10);
+            border-color: rgba(15,155,110,0.28);
+            color: #0a6b50;
+        }
+        .dia-cell.no-hecho {
+            background: rgba(192,39,45,0.07);
+            border-color: rgba(192,39,45,0.18);
+            color: #9f1239;
+        }
+        .dia-cell.futuro {
+            background: rgba(170,176,198,0.08);
+            border-color: rgba(170,176,198,0.15);
+            color: #c0c6d6;
+        }
+        .dia-cell.hoy-sin {
+            background: rgba(212,107,8,0.10);
+            border-color: rgba(212,107,8,0.30);
+            color: #92460a;
+        }
+        .dia-num { font-size: 1.05em; }
+        .dia-icon { font-size: 1.1em; line-height: 1; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ══ HEADER ══ -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">📅</div>
+            <div class="header-title">
+                <h1>Historial de Vehículos</h1>
+                <p>Gestión de flota — Hermes</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="usuarioNombre">Usuario</span>
+            <button class="logout-btn" onclick="logout()">Salir</button>
+        </div>
+    </div>
+
+    <!-- ══ CONTENT CARD ══ -->
+    <div class="content-card">
+
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="window.location.href='crear_vehiculo.html'">📝 Registrar</button>
+            <button class="nav-btn" onclick="window.location.href='ver_vehiculos.html'">📋 Ver Vehículos</button>
+            <button class="nav-btn active" onclick="window.location.href='historial_vehiculos.html'">📅 Historial</button>
+        </div>
+
+        <div class="alert alert-success" id="alertSuccess"></div>
+        <div class="alert alert-error" id="alertError"></div>
+
+        <div class="main-content">
+
+            <!-- COLUMNA IZQUIERDA: Selector -->
+            <div class="selector-wrapper">
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" id="filtroVehiculos" placeholder="Buscar placa, marca, ciudad..."
+                        oninput="filtrarVehiculos(this.value)">
+                </div>
+                <small id="selectorCount"></small>
+                <div class="vehicle-selector" id="vehicleSelector">
+                    <p style="color:#aab0c6;text-align:center;padding:1.5rem 0;font-size:.85rem;">Cargando vehículos...</p>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: Historial -->
+            <div class="historial-section">
+                <div id="historialContainer" class="historial-container">
+                    <div class="historial-title" id="historialTitle">Selecciona un vehículo</div>
+
+                    <button class="add-month-btn" onclick="abrirModalNuevoMes()">➕ Agregar Nuevo Mes</button>
+
+                    <div class="historial-headers">
+                        <div>Mes/Año</div>
+                        <div>Descripción</div>
+                        <div>📋 Preoperacional</div>
+                        <div>🔧 Mantenimiento</div>
+                        <div>🔨 Mant. Correctivo</div>
+                        <div>Eliminar</div>
+                    </div>
+
+                    <div id="historialList"></div>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- /content-card -->
+
+</div>
+
+<!-- Modal nuevo mes -->
+<div id="nuevoMesModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">➕ Agregar Nuevo Registro Mensual</div>
+        <div class="modal-body">
+            <form id="nuevoMesForm">
+                <div class="form-group">
+                    <label>Año</label>
+                    <select id="año" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Mes</label>
+                    <select id="mes" required>
+                        <option value="">-- Selecciona un año primero --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descripción <span style="color:#b0b8cc;font-weight:400;text-transform:none;">(opcional)</span></label>
+                    <input type="text" id="descripcion" placeholder="Ej: Revisión mensual, Inspección...">
+                </div>
+            </form>
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn-modal primary" onclick="submitNuevoMes()">✓ Crear</button>
+            <button type="button" class="btn-modal secondary" onclick="cerrarModalNuevoMes()">✗ Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal subir PDF — mejorado -->
+<!-- Modal historial de correctivos -->
+<div id="modalCorrHist" class="modal">
+    <div class="modal-content" style="max-width:460px;width:94%;">
+        <div class="modal-header">🔨 Historial de Mantenimientos Correctivos</div>
+        <div id="corrHistList" class="corr-hist-list"></div>
+        <div class="modal-buttons">
+            <button type="button" class="btn-modal secondary" onclick="cerrarModalCorrHist()">✕ Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="uploadModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header" id="uploadModalHeader">📎 Cargar Documento Operacional</div>
+        <div class="modal-body">
+            <!-- Badge tipo de documento -->
+            <div class="upload-tipo-badge" id="uploadTipoBadge">
+                <span class="upload-tipo-icon" id="uploadTipoIcon">📋</span>
+                <span class="upload-tipo-text" id="tipoPDFDisplay"></span>
+            </div>
+            <!-- Zona drag & drop -->
+            <div class="upload-drop-zone" id="uploadDropZone"
+                ondragover="event.preventDefault();this.classList.add('drag-over')"
+                ondragleave="this.classList.remove('drag-over')"
+                ondrop="manejarDrop(event)">
+                <input type="file" id="pdfFile" accept=".pdf" onchange="previsualizarArchivo(this)">
+                <div class="upload-drop-icon">📂</div>
+                <div class="upload-drop-titulo">Toca para seleccionar PDF</div>
+                <div class="upload-drop-sub">O arrastra el archivo aquí · Solo archivos .PDF</div>
+            </div>
+            <!-- Preview nombre archivo -->
+            <div class="upload-file-preview" id="uploadFilePreview">
+                <span style="font-size:1.3em">📄</span>
+                <span class="upload-file-name" id="uploadFileName"></span>
+                <button class="upload-file-clear" onclick="limpiarArchivoSeleccionado()" title="Quitar">✕</button>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn-modal primary" id="btnCargarPDF" onclick="submitUpload()" disabled>✓ Cargar documento</button>
+            <button type="button" class="btn-modal secondary" onclick="cerrarModalSubir()">✗ Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR ELIMINAR ══ -->
+<div id="confirmModal" class="modal-confirm-overlay">
+    <div class="modal-confirm-box">
+        <div class="modal-confirm-header">
+            <span id="confirmTitle">🗑️ Confirmar eliminación</span>
+            <button class="modal-confirm-close" onclick="cerrarConfirm()">✕</button>
+        </div>
+        <div class="modal-confirm-body">
+            <div class="modal-confirm-vehiculo" id="confirmVehiculo"></div>
+            <div class="modal-confirm-aviso" id="confirmAviso"></div>
+        </div>
+        <div class="modal-confirm-footer">
+            <button class="btn-confirm-cancel" onclick="cerrarConfirm()">Cancelar</button>
+            <button class="btn-confirm-ok" id="confirmOkBtn">🗑️ Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = window.location.origin;
+    let usuarioActual = null;
+    let vehiculoSeleccionado = null;
+    let historialIdActual = null;
+    let tipoPDFActual = null;
+    let todosVehiculos = [];
+    const historialCache = {};
+    const historialById  = {};
+
+    const nombresMeses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    window.addEventListener('load', function() {
+        const u = localStorage.getItem('usuario');
+        if (!u) { window.location.href = 'login.html'; return; }
+        usuarioActual = JSON.parse(u);
+        document.getElementById('usuarioNombre').textContent = '👤 ' + usuarioActual.nombre;
+        cargarVehiculos();
+    });
+
+    function cargarVehiculos() {
+        fetch(API_URL + '/vehiculos/' + usuarioActual.id)
+            .then(r => r.json())
+            .then(data => {
+                const selector = document.getElementById('vehicleSelector');
+                const todosRaw = data.vehiculos || [];
+
+                Promise.all(todosRaw.map(v =>
+                    fetch(API_URL + '/historial-vehiculos/' + v.id)
+                        .then(r => r.json())
+                        .then(hd => { historialCache[v.id] = hd.historial || []; })
+                        .catch(() => { historialCache[v.id] = []; })
+                )).then(() => {
+                    const visibles = todosRaw.filter(v => {
+                        if (v.activo === 1)  return true;
+                        if (v.activo === -1) return false;
+                        return (historialCache[v.id] || []).length > 0;
+                    });
+
+                    if (visibles.length === 0) {
+                        selector.innerHTML = '<div class="empty-message">No tienes vehículos aprobados aún.<br><small style="color:#aab0c6;">Los vehículos aparecen aquí una vez que el administrador los apruebe.</small></div>';
+                        return;
+                    }
+
+                    todosVehiculos = visibles;
+                    renderizarTarjetas(todosVehiculos);
+                    const el = document.getElementById('selectorCount');
+                    if (el) el.textContent = todosVehiculos.length + ' vehículo' + (todosVehiculos.length !== 1 ? 's' : '');
+                    if (todosVehiculos.length > 0)
+                        setTimeout(() => {
+                            const first = document.querySelector('.vehicle-card-select');
+                            if (first) first.click();
+                        }, 200);
+                });
+            })
+            .catch(e => console.error(e));
+    }
+
+    function filtrarVehiculos(texto) {
+        const q = texto.toLowerCase().trim();
+        const lista = q ? todosVehiculos.filter(v =>
+            (v.placa||'').toLowerCase().includes(q) ||
+            (v.marca||'').toLowerCase().includes(q) ||
+            (v.ciudad||'').toLowerCase().includes(q) ||
+            (v.proveedor||'').toLowerCase().includes(q) ||
+            (v.tonelaje||'').toLowerCase().includes(q)
+        ) : todosVehiculos;
+        renderizarTarjetas(lista);
+        const el = document.getElementById('selectorCount');
+        if (el) el.textContent = lista.length === todosVehiculos.length
+            ? lista.length + ' vehículo' + (lista.length !== 1 ? 's' : '')
+            : lista.length + ' de ' + todosVehiculos.length;
+    }
+
+    function getAnio(r) { return r.año || r.anio || 0; }
+
+    function calcularSemaforo(vehiculoId) {
+        const h = historialCache[vehiculoId];
+        if (!h || !h.length) return { color: '#dc2626', label: 'Sin docs' };
+
+        const now  = new Date();
+        const mesA = now.getMonth() + 1;          // mes actual  (1-12)
+        const añoA = now.getFullYear();
+        // mes anterior con rollover de año
+        const mesP = mesA === 1 ? 12 : mesA - 1;
+        const añoP = mesA === 1 ? añoA - 1 : añoA;
+
+        const regA = h.find(r => r.mes === mesA && getAnio(r) === añoA);  // mes actual
+        const regP = h.find(r => r.mes === mesP && getAnio(r) === añoP);  // mes anterior
+
+        const preopA = regA && !!regA.pdf_preoperacional;
+        const mantA  = regA && !!regA.pdf_mantenimiento;
+        const mantP  = regP && !!regP.pdf_mantenimiento;
+
+        // 🟢 Verde: tiene Preop del mes actual Y Mant del mes actual o anterior
+        if (preopA && (mantA || mantP)) return { color: '#10b981', label: 'Al día' };
+
+        // 🟠 Naranja: tiene Preop del mes actual pero falta Mant en ambos meses
+        if (preopA && !mantA && !mantP) return { color: '#f97316', label: 'Sin mant.' };
+
+        // 🔴 Rojo: no tiene Preop ni Mant en mes actual ni anterior
+        return { color: '#dc2626', label: 'Sin docs' };
+    }
+
+    async function verificarCorrectivoConsecutivo(vehiculoId) {
+        const h = historialCache[vehiculoId] || [];
+        const conCorr = h.filter(r => !!r.pdf_mantenimiento_correctivo)
+            .sort((a, b) => (getAnio(b) * 12 + b.mes) - (getAnio(a) * 12 + a.mes));
+        if (conCorr.length < 2) return;
+        const diff = (getAnio(conCorr[0]) * 12 + conCorr[0].mes) - (getAnio(conCorr[1]) * 12 + conCorr[1].mes);
+        if (diff === 1) {
+            try {
+                await fetch(API_URL + '/vehiculos/' + vehiculoId + '/desactivar', { method: 'PUT' });
+                const v = todosVehiculos.find(x => x.id === vehiculoId);
+                if (v) v.activo = 0;
+                const card = document.getElementById('vcard-' + vehiculoId);
+                if (card && !card.querySelector('.corr-banner')) {
+                    const banner = document.createElement('div');
+                    banner.className = 'corr-banner';
+                    banner.innerHTML = '⚠️ En revisión por correctivo consecutivo';
+                    card.insertBefore(banner, card.firstChild);
+                }
+                mostrarAlerta('⚠️ Vehículo enviado a revisión por correctivo en 2 meses consecutivos. El historial se conserva.', 'error');
+            } catch(e) { console.error(e); }
+        }
+    }
+
+    function renderizarTarjetas(lista) {
+        const selector = document.getElementById('vehicleSelector');
+        if (!lista || lista.length === 0) {
+            selector.innerHTML = '<p style="color:#aab0c6;text-align:center;padding:1.5rem 0;font-size:.85rem;">Sin resultados</p>';
+            return;
+        }
+        let html = '';
+        lista.forEach(v => {
+            const sem = calcularSemaforo(v.id);
+            const insc = v.mes_inscripcion && v.año_inscripcion
+                ? nombresMeses[v.mes_inscripcion] + ' ' + v.año_inscripcion : 'No especificada';
+            const now = new Date();
+            const hMes = (historialCache[v.id] || []).find(r =>
+                r.mes === now.getMonth() + 1 && getAnio(r) === now.getFullYear());
+            const preop = hMes && !!hMes.pdf_preoperacional;
+            const mant  = hMes && !!hMes.pdf_mantenimiento;
+            const corr  = hMes && !!hMes.pdf_mantenimiento_correctivo;
+            const esEnRevision = v.activo === 0;
+            const corrBanner = esEnRevision
+                ? '<div class="corr-banner">⚠️ En revisión — correctivo consecutivo</div>'
+                : '';
+
+            html += '<div class="vehicle-card-select' + (esEnRevision ? ' en-revision' : '') + '" id="vcard-' + v.id + '" onclick="seleccionarVehiculo(event,' + v.id + ',\'' + v.placa + '\')">'
+                + corrBanner
+                + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'
+                + '<h3>🚚 ' + v.placa + '</h3>'
+                + '<div style="display:flex;gap:8px;flex-shrink:0;margin-left:8px;">'
+                // DOCS semaforo
+                + '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'
+                + '<span style="font-size:.56rem;font-weight:800;color:#aab0c6;text-transform:uppercase;letter-spacing:.05em;">DOCS</span>'
+                + '<div style="width:13px;height:13px;border-radius:50%;background:' + sem.color + ';box-shadow:0 0 6px ' + sem.color + '99;" title="' + sem.label + '"></div>'
+                + '<span style="font-size:.58rem;font-weight:700;color:' + sem.color + ';">' + sem.label + '</span>'
+                + '</div>'
+                // ESTADO semaforo
+                + (function() {
+                    var eColor, eLabel;
+                    if (v.activo === 1)  { eColor = '#10b981'; eLabel = 'Activo'; }
+                    else if (v.activo === 0) { eColor = '#f59e0b'; eLabel = 'Pendiente'; }
+                    else                { eColor = '#dc2626'; eLabel = 'Revisión'; }
+                    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'
+                        + '<span style="font-size:.56rem;font-weight:800;color:#aab0c6;text-transform:uppercase;letter-spacing:.05em;">ESTADO</span>'
+                        + '<div style="width:13px;height:13px;border-radius:50%;background:' + eColor + ';box-shadow:0 0 6px ' + eColor + '99;" title="' + eLabel + '"></div>'
+                        + '<span style="font-size:.58rem;font-weight:700;color:' + eColor + ';">' + eLabel + '</span>'
+                        + '</div>';
+                  })()
+                + '</div></div>'
+                + '<div class="vehicle-details">'
+                + '<div class="detail-row"><strong>Marca:</strong>' + (v.marca || '-') + '</div>'
+                + '<div class="detail-row"><strong>Modelo:</strong>' + (v.modelo || '-') + '</div>'
+                + '<div class="detail-row"><strong>Ciudad:</strong>' + (v.ciudad || '-') + '</div>'
+                + '<div class="detail-row"><strong>Tonelaje:</strong>' + v.tonelaje + '</div>'
+                + '<div class="detail-row"><strong>Proveedor:</strong>' + (v.proveedor || '-') + '</div>'
+                + '<div class="detail-row"><strong>Registrado:</strong>' + insc + '</div>'
+                + '</div>'
+                + '<div class="chips-docs">'
+                + '<span class="chip" style="background:' + (preop?'rgba(26,75,204,0.12)':'rgba(170,176,198,0.06)') + ';color:' + (preop?'#1a4bcc':'#c8cdd9') + ';border:1px solid ' + (preop?'rgba(26,75,204,0.22)':'rgba(170,176,198,0.15)') + ';">📋 Preop</span>'
+                + '<span class="chip" style="background:' + (mant?'rgba(26,75,204,0.12)':'rgba(170,176,198,0.06)') + ';color:' + (mant?'#1a4bcc':'#c8cdd9') + ';border:1px solid ' + (mant?'rgba(26,75,204,0.22)':'rgba(170,176,198,0.15)') + ';">🔧 Mant.</span>'
+                + '<span class="chip" style="background:' + (corr?'rgba(26,75,204,0.12)':'rgba(170,176,198,0.06)') + ';color:' + (corr?'#1a4bcc':'#c8cdd9') + ';border:1px solid ' + (corr?'rgba(26,75,204,0.22)':'rgba(170,176,198,0.15)') + ';">🔨 Corr.</span>'
+                + '</div></div>';
+        });
+        selector.innerHTML = html;
+    }
+
+    function seleccionarVehiculo(event, vehiculoId, placa) {
+        event.preventDefault();
+        event.stopPropagation();
+        vehiculoSeleccionado = vehiculoId;
+        document.querySelectorAll('.vehicle-card-select').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        cargarHistorial(vehiculoId, placa);
+        document.getElementById('historialContainer').classList.add('active');
+    }
+
+    // Cache de preoperacionales por vehículo
+    const preopCache = {};
+    // Mapa mesId → objeto historial (para poder regenerar la cascada)
+    const historialMesMap = {};
+
+    async function cargarPreopVehiculo(vehiculoId) {
+        try {
+            const r = await fetch(API_URL + '/preoperacional-diario/' + vehiculoId).then(r => r.json());
+            const map = {};
+            (r.registros || []).forEach(p => { map[p.fecha] = p; });
+            preopCache[vehiculoId] = map;
+            return map;
+        } catch(e) { preopCache[vehiculoId] = {}; return {}; }
+    }
+
+    async function toggleDias(mesId) {
+        const el = document.getElementById('dias-' + mesId);
+        if (!el) return;
+        const abriendo = !el.classList.contains('open');
+        el.classList.toggle('open');
+        const btn = document.getElementById('btn-dias-' + mesId);
+        if (btn) btn.textContent = el.classList.contains('open') ? '▲ Ocultar días' : '📅 Ver días';
+
+        // Al abrir: refrescar datos de preoperacional y regenerar celdas
+        if (abriendo && vehiculoSeleccionado) {
+            const grid = el.querySelector('.dias-grid');
+            if (grid) grid.innerHTML = '<span style="color:#888;font-size:0.82em;padding:6px;">Actualizando…</span>';
+            const preopMap = await cargarPreopVehiculo(vehiculoSeleccionado);
+            const h = historialMesMap[mesId];
+            if (h && grid) {
+                grid.innerHTML = generarCeldasDias(h, preopMap);
+                // Actualizar el contador
+                const titulo = el.querySelector('.dias-cascada-titulo');
+                if (titulo) {
+                    const anio = getAnio(h);
+                    const mes  = h.mes;
+                    const diasEnMes = new Date(anio, mes, 0).getDate();
+                    const hoyD = new Date();
+                    const hechos = Object.keys(preopMap).filter(f => f.startsWith(anio + '-' + String(mes).padStart(2,'0'))).length;
+                    const diasPasados = [...Array(diasEnMes)].filter((_,i) => new Date(anio, mes-1, i+1) <= hoyD).length;
+                    titulo.textContent = `Preoperacional diario — ${hechos} de ${diasPasados} días realizados`;
+                }
+            }
+        }
+    }
+
+    function generarCeldasDias(h, preopMap) {
+        const mes  = h.mes;
+        const anio = getAnio(h);
+        const hoy  = new Date();
+        const diasEnMes = new Date(anio, mes, 0).getDate();
+        let celdas = '';
+        for (let d = 1; d <= diasEnMes; d++) {
+            const fechaStr = anio + '-' + String(mes).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            const diaDate  = new Date(anio, mes - 1, d);
+            const esHoy    = diaDate.toDateString() === hoy.toDateString();
+            const esFuturo = diaDate > hoy;
+            const tienePreop = !!preopMap[fechaStr];
+            let cls, icon;
+            if (esFuturo)        { cls = 'futuro';   icon = '·'; }
+            else if (tienePreop) { cls = 'hecho';    icon = '✅'; }
+            else if (esHoy)      { cls = 'hoy-sin';  icon = '⚠️'; }
+            else                 { cls = 'no-hecho'; icon = '❌'; }
+            celdas += `<div class="dia-cell ${cls}" title="${fechaStr}${tienePreop ? ' — Realizado' : (esFuturo ? '' : ' — No realizado')}">
+                <span class="dia-num">${d}</span>
+                <span class="dia-icon">${icon}</span>
+            </div>`;
+        }
+        return celdas;
+    }
+
+    function generarCascadaDias(h, preopMap) {
+        const mesId = h.id;
+        const mes   = h.mes;
+        const anio  = getAnio(h);
+        const hoy   = new Date();
+        const diasEnMes   = new Date(anio, mes, 0).getDate();
+        const hechos      = Object.keys(preopMap).filter(f => f.startsWith(anio + '-' + String(mes).padStart(2,'0'))).length;
+        const diasPasados = [...Array(diasEnMes)].filter((_,i) => new Date(anio, mes-1, i+1) <= hoy).length;
+
+        // Registrar en el mapa global para poder regenerar al abrir
+        historialMesMap[mesId] = h;
+
+        return `
+        <button class="dias-toggle" id="btn-dias-${mesId}" onclick="toggleDias(${mesId})">📅 Ver días</button>
+        <div class="dias-cascada" id="dias-${mesId}">
+            <div class="dias-cascada-titulo">Preoperacional diario — ${hechos} de ${diasPasados} días realizados</div>
+            <div class="dias-grid">${generarCeldasDias(h, preopMap)}</div>
+        </div>`;
+    }
+
+    function cargarHistorial(vehiculoId, placa) {
+        fetch(API_URL + '/historial-vehiculos/' + vehiculoId)
+            .then(r => r.json())
+            .then(async data => {
+                const title = document.getElementById('historialTitle');
+                const list  = document.getElementById('historialList');
+                title.textContent = '📅 Historial — ' + placa;
+
+                historialCache[vehiculoId] = data.historial || [];
+                // Índice plano por id para acceso rápido desde modales
+                (data.historial || []).forEach(h => { historialById[h.id] = h; });
+                actualizarSemaforoDeTarjeta(vehiculoId);
+
+                if (!data.historial || data.historial.length === 0) {
+                    list.innerHTML = '<div class="empty-message">No hay registros. Agrega el primer mes.</div>';
+                    return;
+                }
+
+                // Cargar preoperacionales del vehículo
+                const preopMap = await cargarPreopVehiculo(vehiculoId);
+
+                let htmlDesktop = '';
+                let htmlMobile  = '';
+
+                data.historial.forEach(h => {
+                    const mesTexto   = nombresMeses[h.mes] || '-';
+                    const anioH      = getAnio(h);
+                    const tienePreop = !!h.pdf_preoperacional;
+                    const tieneMant  = !!h.pdf_mantenimiento;
+                    const tieneCorr  = !!h.pdf_mantenimiento_correctivo;
+
+                    let rowClass = 'historial-row';
+                    if (tienePreop && tieneMant)      rowClass += ' row-completo';
+                    else if (tienePreop || tieneMant) rowClass += ' row-parcial';
+                    else                              rowClass += ' row-vacio';
+
+                    /* ── DESKTOP ROW ── */
+                    htmlDesktop += '<div class="' + rowClass + '">'
+                        + '<div class="mes-año"><strong>' + mesTexto + '</strong>' + anioH + '</div>'
+                        + '<div class="descripcion">' + (h.descripcion || '—') + '</div>';
+
+                    ['preoperacional','mantenimiento','mantenimiento_correctivo'].forEach(tipo => {
+                        htmlDesktop += '<div class="pdf-cell">';
+                        if (tipo === 'mantenimiento_correctivo') {
+                            // Parse adicionales
+                            let adicionales = [];
+                            try { adicionales = JSON.parse(h.pdfs_correctivo_adicionales || '[]'); } catch(e){}
+                            const totalCorr = (h.pdf_mantenimiento_correctivo ? 1 : 0) + adicionales.length;
+                            // Ver historial button — opens modal, only when at least 1 PDF exists
+                            if (h.pdf_mantenimiento_correctivo) {
+                                htmlDesktop += '<button class="btn-small btn-descargar" onclick="abrirModalCorrHist(' + h.id + ')" title="Ver correctivos cargados">📥</button>';
+                            }
+                            // Single upload button — always visible, badge shows total when > 1
+                            const badgeHtml = totalCorr > 1
+                                ? '<span class="corr-count-badge">' + totalCorr + '</span>'
+                                : '';
+                            htmlDesktop += '<span style="position:relative;display:inline-block;">'
+                                + '<button class="btn-small btn-subir" onclick="abrirModalSubir(' + h.id + ',\'mantenimiento_correctivo\')" title="' + (totalCorr > 0 ? 'Agregar otro correctivo' : 'Subir correctivo') + '">📤</button>'
+                                + badgeHtml
+                                + '</span>';
+                        } else {
+                            const ruta = tipo === 'preoperacional' ? h.pdf_preoperacional : h.pdf_mantenimiento;
+                            if (ruta) {
+                                htmlDesktop += '<a href="' + API_URL + ruta + '" class="btn-small btn-descargar" target="_blank">📥</a>';
+                                htmlDesktop += '<button class="btn-small btn-delete" onclick="eliminarPDF(' + h.id + ',\'' + tipo + '\')" title="Eliminar">🗑️</button>';
+                            } else {
+                                htmlDesktop += '<button class="btn-small btn-subir" onclick="abrirModalSubir(' + h.id + ',\'' + tipo + '\')">📤</button>';
+                            }
+                        }
+                        htmlDesktop += '</div>';
+                    });
+
+                    htmlDesktop += '<div><button class="btn-small btn-delete" onclick="eliminarHistorial(' + h.id + ')" title="Eliminar mes">🗑️</button></div>'
+                        + '</div>'
+                        + generarCascadaDias(h, preopMap);
+
+                    /* ── MOBILE CARD ── */
+                    let cardClass = 'mes-card';
+                    let estadoColor, estadoLabel;
+                    if (tienePreop && tieneMant)      { cardClass += ' row-completo'; estadoColor='#10b981'; estadoLabel='✔ Completo'; }
+                    else if (tienePreop || tieneMant) { cardClass += ' row-parcial';  estadoColor='#f59e0b'; estadoLabel='⚠ Parcial'; }
+                    else                              { cardClass += ' row-vacio';    estadoColor='#dc2626'; estadoLabel='✗ Sin docs'; }
+
+                    const docsConfig = [
+                        { tipo:'preoperacional', icono:'📋', nombre:'Preoperacional',           icClass:'preop', tiene:tienePreop, ruta:h.pdf_preoperacional },
+                        { tipo:'mantenimiento',  icono:'🔧', nombre:'Mantenimiento preventivo',  icClass:'mant',  tiene:tieneMant,  ruta:h.pdf_mantenimiento }
+                    ];
+
+                    const zonasHtml = docsConfig.map(d => {
+                        const acciones = d.tiene
+                            ? `<div class="doc-zona-acciones">
+                                <a href="${API_URL}${d.ruta}" class="btn-doc-ver" target="_blank">📥 Ver PDF</a>
+                                <button class="btn-doc-del" onclick="eliminarPDF(${h.id},'${d.tipo}')" title="Eliminar">🗑️</button>
+                               </div>`
+                            : `<button class="btn-doc-subir" onclick="abrirModalSubir(${h.id},'${d.tipo}')">⬆ Subir PDF</button>`;
+                        const sub = d.tiene
+                            ? `<span class="doc-zona-sub ok">✔ Cargado — toca Ver PDF para abrir</span>`
+                            : `<span class="doc-zona-sub">Sin documento adjunto</span>`;
+                        return `<div class="doc-zona">
+                            <div class="doc-zona-icono ${d.icClass}">${d.icono}</div>
+                            <div class="doc-zona-info">
+                                <div class="doc-zona-nombre">${d.nombre}</div>
+                                ${sub}
+                            </div>
+                            ${acciones}
+                        </div>`;
+                    }).join('');
+
+                    // Correctivo zone — multiple PDFs support
+                    let corrAdicionales = [];
+                    try { corrAdicionales = JSON.parse(h.pdfs_correctivo_adicionales || '[]'); } catch(e){}
+                    const totalCorrMob = (h.pdf_mantenimiento_correctivo ? 1 : 0) + corrAdicionales.length;
+                    const corrBadgeHtml = totalCorrMob > 1
+                        ? `<span class="corr-count-badge" style="position:relative;top:0;right:0;margin-left:6px;">${totalCorrMob}</span>`
+                        : '';
+                    const corrSubHtml = totalCorrMob > 0
+                        ? `<span class="doc-zona-sub ok">✔ ${totalCorrMob} documento${totalCorrMob>1?'s':''} cargado${totalCorrMob>1?'s':''}</span>`
+                        : `<span class="doc-zona-sub">Sin documento adjunto</span>`;
+                    const corrVerBtn = totalCorrMob > 0
+                        ? `<button class="btn-doc-ver" style="margin-bottom:6px;display:block;width:100%;text-align:center;" onclick="abrirModalCorrHist(${h.id})">📥 Ver correctivos</button>`
+                        : '';
+                    const corrZona = `<div class="doc-zona">
+                        <div class="doc-zona-icono corr">🔨</div>
+                        <div class="doc-zona-info" style="flex:1;">
+                            <div class="doc-zona-nombre">Mant. correctivo${corrBadgeHtml}</div>
+                            ${corrSubHtml}
+                            ${corrVerBtn}
+                        </div>
+                        <button class="btn-doc-subir" onclick="abrirModalSubir(${h.id},'mantenimiento_correctivo')" title="Agregar correctivo">⬆ Subir PDF</button>
+                    </div>`;
+                    const todasZonasHtml = zonasHtml + corrZona;
+
+                    const cascadaDias = generarCascadaDias(h, preopMap);
+                    htmlMobile += `<div class="${cardClass}">
+                        <div class="mes-card-header">
+                            <span class="mes-card-titulo">${mesTexto} ${anioH}</span>
+                            <div class="mes-card-estado">
+                                <div class="mes-card-estado-dot" style="background:${estadoColor};box-shadow:0 0 6px ${estadoColor}99;width:9px;height:9px;border-radius:50%;"></div>
+                                <span class="mes-card-estado-label">${estadoLabel}</span>
+                            </div>
+                        </div>
+                        ${h.descripcion ? `<div class="mes-card-desc">📝 ${h.descripcion}</div>` : ''}
+                        <div style="padding:0 18px 10px;">${cascadaDias}</div>
+                        ${todasZonasHtml}
+                        <div class="mes-card-footer">
+                            <button class="btn-del-mes" onclick="eliminarHistorial(${h.id})">🗑️ Eliminar mes completo</button>
+                        </div>
+                    </div>`;
+                });
+
+                list.innerHTML = htmlDesktop + htmlMobile;
+            })
+            .catch(e => console.error(e));
+    }
+
+
+    function actualizarSemaforoDeTarjeta(vehiculoId) {
+        const card = document.getElementById('vcard-' + vehiculoId);
+        if (!card) return;
+        const sem = calcularSemaforo(vehiculoId);
+        const dot = card.querySelector('div[style*="border-radius:50%"]');
+        const lbl = card.querySelectorAll('span[style*="font-weight"]')[0];
+        if (dot) { dot.style.background = sem.color; dot.style.boxShadow = '0 0 6px ' + sem.color + '99'; dot.title = sem.label; }
+        if (lbl) { lbl.style.color = sem.color; lbl.textContent = sem.label; }
+        const now = new Date();
+        const hMes = (historialCache[vehiculoId] || []).find(r =>
+            r.mes === now.getMonth() + 1 && getAnio(r) === now.getFullYear());
+        const chips = card.querySelectorAll('.chip');
+        const preop = hMes && !!hMes.pdf_preoperacional;
+        const mant  = hMes && !!hMes.pdf_mantenimiento;
+        const corr  = hMes && !!hMes.pdf_mantenimiento_correctivo;
+        if (chips[0]) { chips[0].style.background = preop?'rgba(26,75,204,0.12)':'rgba(170,176,198,0.06)'; chips[0].style.color = preop?'#1a4bcc':'#c8cdd9'; chips[0].style.border = preop?'1px solid rgba(26,75,204,0.22)':'1px solid rgba(170,176,198,0.15)'; }
+        if (chips[1]) { chips[1].style.background = mant?'rgba(26,75,204,0.12)':'rgba(170,176,198,0.06)'; chips[1].style.color = mant?'#1a4bcc':'#c8cdd9'; chips[1].style.border = mant?'1px solid rgba(26,75,204,0.22)':'1px solid rgba(170,176,198,0.15)'; }
+        if (chips[2]) { chips[2].style.background = corr?'rgba(26,75,204,0.12)':'rgba(170,176,198,0.06)'; chips[2].style.color = corr?'#1a4bcc':'#c8cdd9'; chips[2].style.border = corr?'1px solid rgba(26,75,204,0.22)':'1px solid rgba(170,176,198,0.15)'; }
+    }
+
+    function abrirModalNuevoMes() {
+        if (!vehiculoSeleccionado) { mostrarAlerta('❌ Selecciona un vehículo primero', 'error'); return; }
+
+        // Datos del vehículo seleccionado para filtrar rango válido
+        const v = todosVehiculos.find(x => x.id === vehiculoSeleccionado);
+        const mesInsc = v && v.mes_inscripcion ? parseInt(v.mes_inscripcion) : 1;
+        const añoInsc = v && v.año_inscripcion ? parseInt(v.año_inscripcion) : 2020;
+        const ahora   = new Date();
+        const mesHoy  = ahora.getMonth() + 1;
+        const añoHoy  = ahora.getFullYear();
+
+        // Poblar select de años: desde año inscripción hasta año actual
+        const selAño = document.getElementById('año');
+        selAño.innerHTML = '';
+        for (let a = añoInsc; a <= añoHoy; a++) {
+            const opt = document.createElement('option');
+            opt.value = a; opt.textContent = a;
+            if (a === añoHoy) opt.selected = true;
+            selAño.appendChild(opt);
+        }
+
+        // Poblar meses según año seleccionado
+        actualizarMesesDisponibles(mesInsc, añoInsc, añoHoy, mesHoy);
+
+        // Recalcular meses cuando cambia el año
+        selAño.onchange = function() {
+            actualizarMesesDisponibles(mesInsc, añoInsc, añoHoy, mesHoy);
+        };
+
+        document.getElementById('nuevoMesModal').classList.add('active');
+    }
+
+    function actualizarMesesDisponibles(mesInsc, añoInsc, añoHoy, mesHoy) {
+        const selAño = document.getElementById('año');
+        const selMes = document.getElementById('mes');
+        const añoSel = parseInt(selAño.value);
+
+        const mesDesde = (añoSel === añoInsc) ? mesInsc : 1;
+        const mesHasta = (añoSel === añoHoy)  ? mesHoy  : 12;
+
+        // Meses ya registrados para este vehículo en ese año
+        const yaRegistrados = new Set(
+            (historialCache[vehiculoSeleccionado] || [])
+                .filter(h => getAnio(h) === añoSel)
+                .map(h => h.mes)
+        );
+
+        selMes.innerHTML = '<option value="">-- Seleccionar mes --</option>';
+        for (let m = mesDesde; m <= mesHasta; m++) {
+            if (yaRegistrados.has(m)) continue;
+            const opt = document.createElement('option');
+            opt.value = m; opt.textContent = nombresMeses[m];
+            selMes.appendChild(opt);
+        }
+
+        if (selMes.options.length === 1)
+            selMes.innerHTML = '<option value="">✅ Todos los meses registrados</option>';
+    }
+
+    function cerrarModalNuevoMes() {
+        document.getElementById('nuevoMesModal').classList.remove('active');
+        document.getElementById('nuevoMesForm').reset();
+    }
+
+    function submitNuevoMes() {
+        const mes = parseInt(document.getElementById('mes').value);
+        const año = parseInt(document.getElementById('año').value);
+        const descripcion = document.getElementById('descripcion').value;
+        if (!mes || mes < 1 || mes > 12) { mostrarAlerta('❌ Selecciona un mes válido', 'error'); return; }
+        if (!año || año < 2000)          { mostrarAlerta('❌ Selecciona un año válido', 'error'); return; }
+        fetch(API_URL + '/historial-vehiculos?vehiculo_id=' + vehiculoSeleccionado, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mes, año, descripcion })
+        })
+        .then(r => r.json())
+        .then(data => {
+            cerrarModalNuevoMes();
+            if (data.error) { mostrarAlerta('❌ ' + data.error, 'error'); return; }
+            mostrarAlerta('✅ Registro mensual creado', 'success');
+            const placa = document.getElementById('historialTitle').textContent.replace('📅 Historial — ', '');
+            cargarHistorial(vehiculoSeleccionado, placa);
+        })
+        .catch(() => mostrarAlerta('❌ Error al crear registro', 'error'));
+    }
+
+    document.getElementById('nuevoMesForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitNuevoMes();
+    });
+
+    function abrirModalSubir(historialId, tipo) {
+        historialIdActual = historialId;
+        tipoPDFActual = tipo;
+        const cfg = {
+            preoperacional:           { icono:'📋', nombre:'Preoperacional',           header:'📋 Subir Preoperacional',          color:'rgba(26,75,204,0.10)' },
+            mantenimiento:            { icono:'🔧', nombre:'Mantenimiento preventivo',  header:'🔧 Subir Mantenimiento Preventivo', color:'rgba(15,155,110,0.10)' },
+            mantenimiento_correctivo: { icono:'🔨', nombre:'Mantenimiento correctivo',  header:'🔨 Subir Mantenimiento Correctivo', color:'rgba(212,107,8,0.10)' }
+        };
+        const c = cfg[tipo] || { icono:'📎', nombre:tipo, header:'📎 Subir Documento', color:'rgba(26,75,204,0.10)' };
+        document.getElementById('uploadModalHeader').textContent = c.header;
+        document.getElementById('uploadTipoIcon').textContent   = c.icono;
+        document.getElementById('tipoPDFDisplay').textContent   = c.nombre;
+        document.getElementById('uploadTipoBadge').style.background = c.color;
+        // Reset estado
+        limpiarArchivoSeleccionado();
+        document.getElementById('uploadModal').classList.add('active');
+    }
+
+    function previsualizarArchivo(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const preview  = document.getElementById('uploadFilePreview');
+        const nameEl   = document.getElementById('uploadFileName');
+        const btnCargar = document.getElementById('btnCargarPDF');
+        nameEl.textContent = file.name;
+        preview.classList.add('visible');
+        btnCargar.disabled = false;
+        // Cambiar drop zone a estado "seleccionado"
+        const zone = document.getElementById('uploadDropZone');
+        zone.style.borderColor = 'var(--verde)';
+        zone.style.background  = 'rgba(15,155,110,0.05)';
+    }
+
+    function limpiarArchivoSeleccionado() {
+        document.getElementById('pdfFile').value = '';
+        document.getElementById('uploadFilePreview').classList.remove('visible');
+        document.getElementById('btnCargarPDF').disabled = true;
+        const zone = document.getElementById('uploadDropZone');
+        zone.style.borderColor = '';
+        zone.style.background  = '';
+        zone.classList.remove('drag-over');
+    }
+
+    function manejarDrop(event) {
+        event.preventDefault();
+        const zone = document.getElementById('uploadDropZone');
+        zone.classList.remove('drag-over');
+        const files = event.dataTransfer.files;
+        if (!files || !files[0]) return;
+        if (!files[0].name.toLowerCase().endsWith('.pdf')) {
+            mostrarAlerta('❌ Solo se aceptan archivos PDF', 'error'); return;
+        }
+        // Asignar al input
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        const inp = document.getElementById('pdfFile');
+        inp.files = dt.files;
+        previsualizarArchivo(inp);
+    }
+
+    function cerrarModalSubir() {
+        document.getElementById('uploadModal').classList.remove('active');
+        limpiarArchivoSeleccionado();
+    }
+
+    /* ── Historial de correctivos ── */
+    function abrirModalCorrHist(histId) {
+        const h = historialById[histId];
+        if (!h) return;
+
+        let adicionales = [];
+        try { adicionales = JSON.parse(h.pdfs_correctivo_adicionales || '[]'); } catch(e){}
+
+        // Construir lista
+        const items = [];
+        if (h.pdf_mantenimiento_correctivo) {
+            items.push({ num: 1, ruta: h.pdf_mantenimiento_correctivo, fecha: h.fecha_carga, tipo: 'mantenimiento_correctivo', idx: null });
+        }
+        adicionales.forEach((entrada, i) => {
+            const ruta  = typeof entrada === 'object' ? entrada.ruta  : entrada;
+            const fecha = typeof entrada === 'object' ? entrada.fecha : null;
+            items.push({ num: i + 2, ruta, fecha, tipo: 'mantenimiento_correctivo_adicional', idx: i });
+        });
+
+        const fmt = iso => {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' })
+                + ' ' + d.toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
+        };
+
+        const listEl = document.getElementById('corrHistList');
+        if (items.length === 0) {
+            listEl.innerHTML = '<p class="corr-hist-empty">Sin correctivos cargados</p>';
+        } else {
+            listEl.innerHTML = items.map(it => `
+                <div class="corr-hist-item">
+                    <div class="corr-hist-num">#${it.num}</div>
+                    <div class="corr-hist-info">
+                        <div style="font-weight:700;font-size:0.88em;">Correctivo ${it.num === 1 ? '<span style="font-size:0.75em;color:#8a94b0;">(principal)</span>' : ''}</div>
+                        <div class="corr-hist-fecha">📅 ${fmt(it.fecha)}</div>
+                    </div>
+                    <div class="corr-hist-acciones">
+                        <a href="${API_URL}${it.ruta}" class="btn-corr-ver" target="_blank">📥 Ver</a>
+                        <button class="btn-corr-del" onclick="eliminarPDFDesdeHist(${histId},'${it.tipo}',${it.idx !== null ? it.idx : 'null'})" title="Eliminar">🗑️</button>
+                    </div>
+                </div>`).join('');
+        }
+        document.getElementById('modalCorrHist').classList.add('active');
+    }
+
+    function cerrarModalCorrHist() {
+        document.getElementById('modalCorrHist').classList.remove('active');
+    }
+
+    function eliminarPDFDesdeHist(histId, tipo, idx) {
+        cerrarModalCorrHist();
+        if (idx === null || idx === 'null') {
+            eliminarPDF(histId, tipo);
+        } else {
+            eliminarPDF(histId, tipo, idx);
+        }
+    }
+
+    function submitUpload() {
+        const pdfFile = document.getElementById('pdfFile').files[0];
+        if (!pdfFile) { mostrarAlerta('❌ Selecciona un archivo PDF', 'error'); return; }
+        const btn = document.getElementById('btnCargarPDF');
+        btn.disabled = true; btn.textContent = '⏳ Subiendo…';
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        const tipoSubido = tipoPDFActual;
+        fetch(API_URL + '/historial-vehiculos/' + historialIdActual + '/upload-pdf?tipo=' + tipoPDFActual, {
+            method: 'POST', body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            cerrarModalSubir();
+            if (data.error) { mostrarAlerta('❌ ' + data.error, 'error'); return; }
+            mostrarAlerta('✅ PDF subido exitosamente', 'success');
+            const placa = document.getElementById('historialTitle').textContent.replace('📅 Historial — ', '');
+            cargarHistorial(vehiculoSeleccionado, placa);
+            if (tipoSubido === 'mantenimiento_correctivo')
+                setTimeout(() => verificarCorrectivoConsecutivo(vehiculoSeleccionado), 600);
+        })
+        .catch(() => { mostrarAlerta('❌ Error al subir el PDF', 'error'); btn.disabled = false; btn.textContent = '✓ Cargar documento'; });
+    }
+
+    /* ══ MODAL CONFIRMAR ══ */
+    let _confirmCallback = null;
+
+    function abrirConfirm({ titulo, vehiculo, aviso, btnLabel, callback }) {
+        document.getElementById('confirmTitle').textContent   = titulo;
+        document.getElementById('confirmVehiculo').innerHTML  = vehiculo;
+        document.getElementById('confirmAviso').innerHTML     = aviso;
+        document.getElementById('confirmOkBtn').innerHTML     = '🗑️ ' + btnLabel;
+        _confirmCallback = callback;
+        document.getElementById('confirmModal').classList.add('active');
+    }
+
+    function cerrarConfirm() {
+        document.getElementById('confirmModal').classList.remove('active');
+        _confirmCallback = null;
+    }
+
+    function ejecutarConfirm() {
+        const cb = _confirmCallback;  // capturar ANTES de limpiar
+        cerrarConfirm();              // limpia _confirmCallback
+        if (typeof cb === 'function') cb();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirmOkBtn').addEventListener('click', ejecutarConfirm);
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) cerrarConfirm();
+        });
+    });
+
+    function eliminarPDF(historialId, tipo, idx) {
+        const nom    = {
+            preoperacional: 'Preoperacional',
+            mantenimiento: 'Mantenimiento',
+            mantenimiento_correctivo: 'Mant. Correctivo',
+            mantenimiento_correctivo_adicional: 'Correctivo adicional #' + (typeof idx === 'number' ? idx + 2 : '')
+        };
+        const iconos = { preoperacional: '📋', mantenimiento: '🔧', mantenimiento_correctivo: '🔨', mantenimiento_correctivo_adicional: '🔨' };
+        const placa  = document.getElementById('historialTitle').textContent.replace('📅 Historial — ', '');
+        abrirConfirm({
+            titulo:   '🗑️ Eliminar documento PDF',
+            vehiculo: 'Vehículo: <strong>' + placa + '</strong> &nbsp;·&nbsp; Tipo: <strong>' + (iconos[tipo]||'') + ' ' + (nom[tipo]||tipo) + '</strong>',
+            aviso:    '⚠️ El archivo PDF será <strong>eliminado permanentemente</strong>. Esta acción no se puede deshacer.<br>Podrás subir un nuevo documento en cualquier momento.',
+            btnLabel: 'Eliminar PDF',
+            callback: function() {
+                let url = API_URL + '/historial-vehiculos/' + historialId + '/delete-pdf?tipo=' + tipo;
+                if (tipo === 'mantenimiento_correctivo_adicional' && typeof idx === 'number') {
+                    url += '&idx=' + idx;
+                }
+                fetch(url, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) { mostrarAlerta('❌ ' + data.error, 'error'); return; }
+                    mostrarAlerta('✅ PDF eliminado', 'success');
+                    cargarHistorial(vehiculoSeleccionado, placa);
+                })
+                .catch(() => mostrarAlerta('❌ Error al eliminar PDF', 'error'));
+            }
+        });
+    }
+
+    function eliminarHistorial(historialId) {
+        const placa = document.getElementById('historialTitle').textContent.replace('📅 Historial — ', '');
+        abrirConfirm({
+            titulo:   '🗑️ Eliminar registro mensual',
+            vehiculo: 'Vehículo: <strong>' + placa + '</strong>',
+            aviso:    '⚠️ Se eliminará el <strong>registro completo del mes</strong>, incluyendo todos los documentos PDF adjuntos.<br>Esta acción es <strong>irreversible</strong>.',
+            btnLabel: 'Eliminar registro',
+            callback: function() {
+                fetch(API_URL + '/historial-vehiculos/' + historialId, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(() => {
+                    mostrarAlerta('✅ Registro eliminado', 'success');
+                    cargarHistorial(vehiculoSeleccionado, placa);
+                })
+                .catch(() => mostrarAlerta('❌ Error al eliminar', 'error'));
+            }
+        });
+    }
+
+    function mostrarAlerta(mensaje, tipo) {
+        const id = tipo === 'success' ? 'alertSuccess' : 'alertError';
+        const el = document.getElementById(id);
+        el.textContent = mensaje;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    function logout() {
+        if (confirm('¿Deseas cerrar sesión?')) {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+    }
+</script>
+
+<!-- ══ BOTÓN TUTORIAL FLOTANTE ══ -->
+<button class="tut-fab" id="tutFab" onclick="abrirTutorial()" title="Ayuda — ¿Qué significa cada elemento?">?</button>
+
+<!-- ══ PANEL TUTORIAL ══ -->
+<div class="tut-overlay" id="tutOverlay" onclick="if(event.target===this)cerrarTutorial()">
+  <div class="tut-panel" id="tutPanel">
+
+    <div class="tut-header">
+      <div class="tut-header-left">
+        <div class="tut-header-icon">📖</div>
+        <div>
+          <div class="tut-header-title">Guía de la página</div>
+          <div class="tut-header-sub">Historial de Vehículos</div>
+        </div>
+      </div>
+      <button class="tut-close" onclick="cerrarTutorial()">✕</button>
+    </div>
+
+    <div class="tut-body">
+
+      <!-- BLOQUE 1: Tarjeta de vehículo -->
+      <div class="tut-block">
+        <div class="tut-block-title">🚚 Tarjeta de selección de vehículo</div>
+        <div class="tut-block-desc">Cada tarjeta en el panel izquierdo representa un vehículo de tu flota. Al hacer clic en una la seleccionas y su historial aparece a la derecha.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.10);color:var(--azul)">🚚</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Placa del vehículo</div>
+              <div class="tut-item-desc">Identificador único del vehículo. Las placas siempre están en mayúsculas.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(16,185,129,0.12);color:#065f46">🟢</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Semáforo DOCS — Verde "Al día"</div>
+              <div class="tut-item-desc">Tiene 📋 Preoperacional del mes actual <strong>y</strong> 🔧 Mantenimiento del mes actual o del mes anterior. Todo en orden.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(249,115,22,0.12);color:#c2410c">🟠</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Semáforo DOCS — Naranja "Sin mant."</div>
+              <div class="tut-item-desc">Tiene 📋 Preoperacional del mes actual pero <strong>no</strong> tiene 🔧 Mantenimiento ni del mes actual ni del anterior.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">🔴</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Semáforo DOCS — Rojo "Sin docs"</div>
+              <div class="tut-item-desc">No tiene 📋 Preoperacional ni 🔧 Mantenimiento del mes actual ni del mes anterior. Requiere atención inmediata.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(16,185,129,0.12);color:#065f46">🟢</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Semáforo ESTADO — Verde "Activo"</div>
+              <div class="tut-item-desc">El vehículo fue aprobado por el administrador y está operativo en la flota.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(245,158,11,0.12);color:#92400e">🟡</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Semáforo ESTADO — Amarillo "Pendiente"</div>
+              <div class="tut-item-desc">El vehículo está registrado pero aún espera aprobación del administrador.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">🔴</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Semáforo ESTADO — Rojo "Revisión"</div>
+              <div class="tut-item-desc">El vehículo está en revisión por correctivo consecutivo o fue enviado a revisión por el administrador.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tut-block-title" style="margin-top:16px;">Chips de documentos del mes actual</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">📋</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Chip "📋 Preop"</div>
+              <div class="tut-item-desc"><strong style="color:#065f46">Verde:</strong> el PDF preoperacional del mes está cargado. <strong style="color:#aab0c6">Gris:</strong> aún no se ha subido.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">🔧</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Chip "🔧 Mant."</div>
+              <div class="tut-item-desc"><strong style="color:#065f46">Verde:</strong> el PDF de mantenimiento preventivo del mes está cargado. <strong style="color:#aab0c6">Gris:</strong> pendiente.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(212,107,8,0.10);color:#92460a">🔨</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Chip "🔨 Corr."</div>
+              <div class="tut-item-desc"><strong style="color:#92400e">Naranja:</strong> se cargó un mantenimiento correctivo este mes (indica falla inesperada). <strong style="color:#aab0c6">Gris:</strong> no aplica.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2: Tabla de historial -->
+      <div class="tut-block">
+        <div class="tut-block-title">📅 Tabla de historial mensual</div>
+        <div class="tut-block-desc">Muestra todos los meses registrados para el vehículo seleccionado. Cada fila es un mes/año con sus documentos asociados.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(16,185,129,0.12);color:#065f46">🟩</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Borde izquierdo verde — Fila completa</div>
+              <div class="tut-item-desc">Ese mes tiene tanto el Preoperacional como el Mantenimiento cargados. Todo en orden.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(245,158,11,0.12);color:#92400e">🟨</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Borde izquierdo amarillo — Fila parcial</div>
+              <div class="tut-item-desc">Ese mes tiene solo uno de los dos documentos obligatorios. Hay que completar el faltante.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">🟥</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Borde izquierdo rojo — Fila vacía</div>
+              <div class="tut-item-desc">El mes fue creado pero no tiene ningún documento cargado todavía.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(15,155,110,0.10);color:#065f46">📥</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Botón 📥 (azul) — Descargar PDF</div>
+              <div class="tut-item-desc">El documento ya está cargado. Al hacer clic se abre o descarga el PDF en una nueva pestaña.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(170,176,198,0.18);color:#9aa0b8">📤</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Botón 📤 (gris) — Subir PDF</div>
+              <div class="tut-item-desc">El documento aún no está cargado. Al hacer clic se abre el formulario para seleccionar y subir el archivo PDF.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">🗑️</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Botón 🗑️ (rojo) — Eliminar</div>
+              <div class="tut-item-desc">Aparece junto a un PDF para eliminarlo, o al final de la fila para borrar el registro completo del mes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 3: Acciones -->
+      <div class="tut-block">
+        <div class="tut-block-title">⚙️ Acciones principales</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(15,155,110,0.10);color:#065f46">➕</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Agregar Nuevo Mes</div>
+              <div class="tut-item-desc">Crea un nuevo registro mensual para el vehículo seleccionado. Se elige mes, año y una descripción opcional. Solo puede existir un registro por mes/año por vehículo.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">🔍</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Buscador de vehículos</div>
+              <div class="tut-item-desc">Filtra las tarjetas del panel izquierdo en tiempo real. Puedes buscar por placa, marca, ciudad, proveedor o tonelaje.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 4: Preoperacional diario -->
+      <div class="tut-block">
+        <div class="tut-block-title">📋 Preoperacional diario</div>
+        <div class="tut-block-desc">Checklist de seguridad que el conductor completa una vez por día. Dentro de cada mes podés ver cuántos días fueron realizados sobre el total del mes.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(16,185,129,0.12);color:#065f46">✓</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Día marcado en verde</div>
+              <div class="tut-item-desc">El preoperacional de ese día fue completado correctamente.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">✗</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Día marcado en rojo</div>
+              <div class="tut-item-desc">No se registró preoperacional ese día. El administrador recibe una alerta por cada vehículo activo sin checklist del día.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">📊</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Contador de días realizados</div>
+              <div class="tut-item-desc">Muestra cuántos días del mes tienen preoperacional registrado sobre el total (ej. 18 de 28 días realizados).</div>
+            </div>
+          </div>
+        </div>
+        <div class="tut-block-desc" style="margin-top:10px;">El checklist incluye 15 ítems: frenos, llantas, dirección, luces, nivel de aceite, extintor, SOAT vigente, revisión técnica, licencia de conducción y estado del conductor.</div>
+      </div>
+
+      <!-- BLOQUE 5: SOAT y Tecnomecánica -->
+      <div class="tut-block">
+        <div class="tut-block-title">📄 SOAT y Tecnomecánica</div>
+        <div class="tut-block-desc">Documentos obligatorios de cumplimiento legal del vehículo. Se registran al momento de crear el vehículo y el administrador monitorea su vigencia.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(16,185,129,0.12);color:#065f46">📄</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">SOAT</div>
+              <div class="tut-item-desc">Seguro Obligatorio de Accidentes de Tránsito. Se almacena la fecha de vencimiento y el PDF. El sistema alerta cuando lleva más de un año vencido o no está registrado.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">🔩</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Tecnomecánica</div>
+              <div class="tut-item-desc">Revisión técnico-mecánica y de gases. Se guarda la fecha de vencimiento y el PDF para consulta y seguimiento por parte del administrador.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tut-footer">
+        <span>💡 Si tienes dudas, contacta al administrador del sistema.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  /* ══ TUTORIAL FAB ══ */
+  .tut-fab {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(140deg, rgba(26,75,204,0.92) 0%, rgba(15,45,138,0.97) 100%);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.25);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.5em; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(15,45,138,0.35), 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 900;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tut-fab:hover {
+    transform: translateY(-3px) scale(1.07);
+    box-shadow: 0 10px 32px rgba(15,45,138,0.45);
+  }
+  .tut-fab.open {
+    background: linear-gradient(140deg, rgba(192,39,45,0.88) 0%, rgba(142,26,31,0.96) 100%);
+    transform: rotate(15deg) scale(1.05);
+  }
+
+  /* ══ OVERLAY ══ */
+  .tut-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(15,45,138,0.35);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1500;
+    align-items: flex-start; justify-content: flex-end;
+    padding: 20px;
+  }
+  .tut-overlay.active { display: flex; }
+
+  /* ══ PANEL ══ */
+  .tut-panel {
+    width: 100%; max-width: 440px;
+    max-height: calc(100vh - 40px);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-radius: 20px;
+    border: 1.5px solid rgba(26,75,204,0.14);
+    box-shadow: 0 24px 70px rgba(15,45,138,0.25), inset 0 1px 0 rgba(255,255,255,0.9);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: tutSlideIn 0.30s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  @keyframes tutSlideIn {
+    from { opacity: 0; transform: translateX(30px) scale(0.97); }
+    to   { opacity: 1; transform: translateX(0)    scale(1); }
+  }
+
+  /* ── Header ── */
+  .tut-header {
+    background: linear-gradient(140deg, rgba(26,75,204,0.90) 0%, rgba(15,45,138,0.97) 100%);
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .tut-header-left { display: flex; align-items: center; gap: 12px; }
+  .tut-header-icon {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1em;
+  }
+  .tut-header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.15em; font-weight: 700;
+    color: white; letter-spacing: 0.03em;
+  }
+  .tut-header-sub { font-size: 0.76em; color: rgba(255,255,255,0.6); margin-top: 1px; }
+  .tut-close {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: white; cursor: pointer; font-size: 0.9em;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; flex-shrink: 0;
+  }
+  .tut-close:hover { background: rgba(255,255,255,0.28); }
+
+  /* ── Body scrollable ── */
+  .tut-body {
+    overflow-y: auto;
+    padding: 18px 20px;
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(26,75,204,0.2) transparent;
+  }
+  .tut-body::-webkit-scrollbar { width: 5px; }
+  .tut-body::-webkit-scrollbar-track { background: transparent; }
+  .tut-body::-webkit-scrollbar-thumb { background: rgba(26,75,204,0.2); border-radius: 10px; }
+
+  /* ── Bloques ── */
+  .tut-block {
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1.5px solid rgba(26,75,204,0.08);
+  }
+  .tut-block:last-of-type { border-bottom: none; margin-bottom: 0; }
+
+  .tut-block-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.98em; font-weight: 700;
+    color: var(--azul); letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .tut-block-desc {
+    font-size: 0.83em; color: #6b7591;
+    line-height: 1.6; margin-bottom: 14px;
+  }
+
+  /* ── Items ── */
+  .tut-items { display: flex; flex-direction: column; gap: 10px; }
+  .tut-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: rgba(248,249,251,0.8);
+    border: 1.5px solid rgba(26,75,204,0.07);
+    border-radius: 12px;
+    padding: 11px 14px;
+    transition: all 0.2s;
+  }
+  .tut-item:hover {
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(26,75,204,0.16);
+    transform: translateX(3px);
+  }
+  .tut-item-icon {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05em;
+  }
+  .tut-item-body { flex: 1; min-width: 0; }
+  .tut-item-name {
+    font-weight: 700; font-size: 0.86em;
+    color: var(--gris-texto); margin-bottom: 3px;
+  }
+  .tut-item-desc { font-size: 0.79em; color: #6b7591; line-height: 1.55; }
+
+  /* ── Footer ── */
+  .tut-footer {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: rgba(26,75,204,0.05);
+    border: 1px solid rgba(26,75,204,0.10);
+    border-radius: 10px;
+    font-size: 0.78em; color: #6b7591;
+    text-align: center; line-height: 1.5;
+  }
+
+  @media (max-width: 520px) {
+    .tut-overlay { padding: 10px; align-items: flex-end; }
+    .tut-panel   { max-width: 100%; max-height: 88vh; border-radius: 20px 20px 12px 12px; }
+    .tut-fab     { bottom: 20px; right: 16px; }
+  }
+
+  /* ══ FIX MÓVIL — Tarjetas de mes ══ */
+@media (max-width: 768px) {
+
+    /* Contenedor principal que falta overflow */
+    .mes-card {
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Zona de documento — evitar desborde */
+    .doc-zona {
+        flex-wrap: wrap;
+        gap: 10px;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    /* Texto largo que se sale */
+    .doc-zona-info {
+        min-width: 0;
+        flex: 1 1 120px;
+    }
+    .doc-zona-nombre {
+        white-space: normal;
+        word-break: break-word;
+    }
+    .doc-zona-sub {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* Botones — que no se salgan */
+    .btn-doc-subir {
+        flex-shrink: 0;
+        max-width: 100%;
+        white-space: nowrap;
+    }
+    .doc-zona-acciones {
+        flex-shrink: 0;
+        flex-wrap: nowrap;
+    }
+    .btn-doc-ver {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Header de la tarjeta */
+    .mes-card-header {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* Footer */
+    .mes-card-footer {
+        overflow: hidden;
+    }
+    .btn-del-mes {
+        max-width: 100%;
+    }
+
+    /* Evitar que el body/container principal también se desborde */
+    .content-card {
+        overflow: hidden;
+    }
+    .historial-section {
+        overflow: hidden;
+        min-width: 0;
+    }
+}
+</style>
+
+<script>
+  function abrirTutorial() {
+    document.getElementById('tutOverlay').classList.add('active');
+    document.getElementById('tutFab').classList.add('open');
+  }
+  function cerrarTutorial() {
+    document.getElementById('tutOverlay').classList.remove('active');
+    document.getElementById('tutFab').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarTutorial(); });
+</script>
+
+</body>
+</html>

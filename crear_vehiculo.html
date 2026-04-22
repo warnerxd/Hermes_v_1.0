@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Vehículo - Sistema de Gestión de Vehículos</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+        :root {
+            --azul:       #1a4bcc;
+            --azul-dark:  #0f2d8a;
+            --azul-mid:   #2158e0;
+            --rojo:       #c0272d;
+            --rojo-dark:  #8e1a1f;
+            --verde:      #0f9b6e;
+            --naranja:    #d46b08;
+            --blanco:     #ffffff;
+            --gris-claro: #f4f6fb;
+            --gris-texto: #3a4560;
+            --gris-input: #e8ecf5;
+            --dur:        0.28s;
+            --ease:       cubic-bezier(0.4,0,0.2,1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse 90% 70% at 20% 10%, rgba(26,75,204,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 85% 80%, rgba(33,88,224,0.08) 0%, transparent 50%),
+                #e8ecf5;
+            padding: 24px 20px 40px;
+        }
+
+        .container {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        /* ══ HEADER ══ */
+        .header {
+            background: linear-gradient(140deg, rgba(26,75,204,0.92) 0%, rgba(15,45,138,0.97) 100%);
+            backdrop-filter: blur(20px) saturate(1.5);
+            -webkit-backdrop-filter: blur(20px) saturate(1.5);
+            border-radius: 20px;
+            padding: 26px 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            box-shadow: 0 12px 40px rgba(15,45,138,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 14px; }
+
+        .header-icon {
+            width: 46px; height: 46px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .header-title h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.65em;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.03em;
+            line-height: 1.1;
+        }
+        .header-title p {
+            font-size: 0.82em;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 14px; }
+
+        #usuarioNombre {
+            font-size: 0.88em;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.12);
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+
+        .logout-btn {
+            background: rgba(192,39,45,0.75);
+            color: white;
+            padding: 8px 18px;
+            border: 1.5px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 600;
+            font-size: 0.87em;
+            transition: all var(--dur) var(--ease);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .logout-btn:hover {
+            background: rgba(142,26,31,0.85);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(192,39,45,0.3);
+        }
+
+        /* ══ CONTENT CARD ══ */
+        .content-card {
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-radius: 20px;
+            border: 1.5px solid rgba(26,75,204,0.10);
+            padding: 28px 28px 36px;
+            box-shadow: 0 8px 32px rgba(26,75,204,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        /* ══ NAV ══ */
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .nav-btn {
+            padding: 13px 10px;
+            border: 1.5px solid rgba(26,75,204,0.18);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.52);
+            backdrop-filter: blur(12px) saturate(1.4);
+            -webkit-backdrop-filter: blur(12px) saturate(1.4);
+            font-family: 'Barlow', sans-serif;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--gris-texto);
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            box-shadow: 0 2px 8px rgba(26,75,204,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.72);
+            border-color: rgba(26,75,204,0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(26,75,204,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .nav-btn.active {
+            background: rgba(26,75,204,0.10);
+            border-color: var(--azul);
+            color: var(--azul);
+            box-shadow: 0 0 0 3px rgba(26,75,204,0.12), 0 4px 14px rgba(26,75,204,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* ══ ALERTS ══ */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            display: none;
+            font-size: 0.88em;
+            font-weight: 600;
+        }
+        .alert-success {
+            background: rgba(15,155,110,0.10);
+            border: 1px solid rgba(15,155,110,0.28);
+            color: #0a6b50;
+        }
+        .alert-error {
+            background: rgba(192,39,45,0.08);
+            border: 1px solid rgba(192,39,45,0.22);
+            color: #9f1239;
+        }
+
+        /* ══ SECTION TITLE ══ */
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--gris-texto);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-top: 28px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(26,75,204,0.15);
+        }
+        .section-title:first-of-type { margin-top: 0; }
+
+        /* ══ FORM ══ */
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #8a94b0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1.5px solid var(--gris-input);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.93em;
+            color: var(--gris-texto);
+            background: rgba(255,255,255,0.70);
+            transition: border-color 0.22s, box-shadow 0.22s, background 0.18s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--azul);
+            box-shadow: 0 0 0 3px rgba(26,75,204,0.10);
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: #aab0c6; }
+
+        .form-group input[type="file"] {
+            padding: 9px 12px;
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* Proveedor box */
+        .proveedor-box {
+            padding: 12px 14px;
+            background: rgba(26,75,204,0.05);
+            border: 1.5px solid rgba(26,75,204,0.14);
+            border-radius: 10px;
+            color: var(--gris-texto);
+            font-weight: 600;
+            font-size: 0.93em;
+        }
+
+        /* file info */
+        .file-info {
+            font-size: 0.74em;
+            color: #aab0c6;
+            font-weight: 600;
+            margin-top: 5px;
+            letter-spacing: 0.02em;
+        }
+
+        /* ══ SUBMIT ══ */
+        .btn-submit {
+            width: 100%;
+            margin-top: 26px;
+            padding: 14px;
+            background: rgba(26,75,204,0.82);
+            color: white;
+            border: 1.5px solid rgba(255,255,255,0.18);
+            border-radius: 11px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 16px rgba(26,75,204,0.22), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+        .btn-submit:hover {
+            background: rgba(15,45,138,0.90);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(26,75,204,0.30);
+        }
+
+        /* ══ LOADING ══ */
+        .loading {
+            display: none;
+            text-align: center;
+            color: var(--azul);
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(26,75,204,0.06);
+            border-radius: 8px;
+            border: 1px solid rgba(26,75,204,0.14);
+        }
+
+        /* ══ RESPONSIVE ══ */
+        @media (max-width: 768px) {
+            body { padding: 14px 12px 30px; }
+            .header { flex-direction: column; gap: 14px; text-align: center; padding: 20px 18px; }
+            .header-right { justify-content: center; }
+            .nav-buttons { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ══ HEADER ══ -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">📝</div>
+            <div class="header-title">
+                <h1>Registrar Vehículo</h1>
+                <p>Gestión de flota — Hermes</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="usuarioNombre">Usuario</span>
+            <button class="logout-btn" onclick="logout()">Salir</button>
+        </div>
+    </div>
+
+    <!-- ══ CONTENT CARD ══ -->
+    <div class="content-card">
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="window.location.href='crear_vehiculo.html'">📝 Registrar</button>
+            <button class="nav-btn" onclick="window.location.href='ver_vehiculos.html'">📋 Ver Vehículos</button>
+            <button class="nav-btn" onclick="window.location.href='historial_vehiculos.html'">📅 Historial</button>
+        </div>
+
+        <div class="alert alert-success" id="alertSuccess"></div>
+        <div class="alert alert-error"   id="alertError"></div>
+
+        <form id="vehiculoForm">
+
+            <!-- SECCIÓN 1: DATOS BÁSICOS -->
+            <div class="section-title">📋 Datos Básicos del Vehículo</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Placa *</label>
+                    <input type="text" id="placa" required placeholder="ABC-123">
+                </div>
+                <div class="form-group">
+                    <label>Tonelaje *</label>
+                    <select id="tonelaje" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Carry (0.5 - 1.5 ton)">🚐 Carry (0.5 – 1.5 ton)</option>
+                        <option value="NHR (1.5 - 3.0 ton)">🚚 NHR (1.5 – 3.0 ton)</option>
+                        <option value="NPR (3.0 - 5.0 ton)">🚛 NPR (3.0 – 5.0 ton)</option>
+                        <option value="Sencillo (5.0 - 10.0 ton)">🚛 Sencillo (5.0 – 10.0 ton)</option>
+                        <option value="Patineta (10.0 - 20.0 ton)">🚜 Patineta (10.0 – 20.0 ton)</option>
+                        <option value="Tractomula (30.0 - 52.0 ton)">🚛 Tractomula (30.0 – 52.0 ton)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Marca *</label>
+                    <select id="marca" required>
+                        <option value="">-- Seleccionar marca --</option>
+                        <option value="Chevrolet">Chevrolet</option>
+                        <option value="Foton">Foton</option>
+                        <option value="Hino">Hino</option>
+                        <option value="JAC">JAC</option>
+                        <option value="Kenworth">Kenworth</option>
+                        <option value="Freightliner">Freightliner</option>
+                        <option value="Volvo">Volvo</option>
+                        <option value="International">International</option>
+                        <option value="Scania">Scania</option>
+                        <option value="Mercedes-Benz">Mercedes-Benz</option>
+                        <option value="Iveco">Iveco</option>
+                        <option value="OTRO">— OTRO —</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Año Modelo *</label>
+                    <input type="number" id="modelo" min="1990" max="2100" placeholder="Ej: 2020" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ciudad *</label>
+                    <select id="ciudad" required>
+                        <option value="">-- Seleccionar ciudad --</option>
+                        <optgroup label="Principales">
+                            <option>Bogotá</option>
+                            <option>Medellín</option>
+                            <option>Cali</option>
+                            <option>Barranquilla</option>
+                            <option>Cartagena</option>
+                            <option>Bucaramanga</option>
+                            <option>Cúcuta</option>
+                            <option>Pereira</option>
+                            <option>Manizales</option>
+                            <option>Ibagué</option>
+                        </optgroup>
+                        <optgroup label="Otras ciudades">
+                            <option>Armenia</option>
+                            <option>Bello</option>
+                            <option>Buenaventura</option>
+                            <option>Dosquebradas</option>
+                            <option>Envigado</option>
+                            <option>Floridablanca</option>
+                            <option>Girardot</option>
+                            <option>Itagüí</option>
+                            <option>Montería</option>
+                            <option>Neiva</option>
+                            <option>Pasto</option>
+                            <option>Popayán</option>
+                            <option>Rionegro</option>
+                            <option>Santa Marta</option>
+                            <option>Sincelejo</option>
+                            <option>Soacha</option>
+                            <option>Soledad</option>
+                            <option>Tuluá</option>
+                            <option>Tunja</option>
+                            <option>Valledupar</option>
+                            <option>Villavicencio</option>
+                            <option>Yumbo</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cédula dueño <span style="color:#b0b8cc;font-weight:400;text-transform:none;">(opcional)</span></label>
+                    <input type="text" id="cedula" placeholder="1234567890">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Proveedor Asignado</label>
+                <div class="proveedor-box" id="proveedorAsignado">Cargando...</div>
+            </div>
+
+            <!-- SECCIÓN 2: SOAT -->
+            <div class="section-title">🛡️ SOAT</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha SOAT *</label>
+                    <input type="date" id="soat" required>
+                </div>
+                <div class="form-group">
+                    <label>PDF SOAT *</label>
+                    <input type="file" id="pdfSoat" accept=".pdf" required>
+                    <div class="file-info">Máximo 10 MB — Obligatorio en primer registro</div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2B: TECNOMECÁNICA -->
+            <div class="section-title">🔧 Tecnomecánica</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha Tecnomecánica *</label>
+                    <input type="date" id="tecnomecanica" required>
+                </div>
+                <div class="form-group">
+                    <label>PDF Tecnomecánica *</label>
+                    <input type="file" id="pdfTecno" accept=".pdf" required>
+                    <div class="file-info">Máximo 10 MB — Obligatorio en primer registro</div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: DOCUMENTOS PDF -->
+            <div class="section-title">📄 Documentos (PDF)</div>
+
+            <div class="form-group">
+                <label>Certificado de Dueño Proveedor *</label>
+                <input type="file" id="certificadoAliado" accept=".pdf" required>
+                <div class="file-info">Máximo 10 MB — Obligatorio en primer registro</div>
+            </div>
+
+            <div class="form-group">
+                <label>Certificado de Dueño Proveedor *</label>
+                <input type="file" id="certificadoLatin" accept=".pdf" required>
+                <div class="file-info">Máximo 10 MB — Obligatorio en primer registro</div>
+            </div>
+
+            <div class="form-group">
+                <label>Tarjeta de propiedad *</label>
+                <input type="file" id="nit" accept=".pdf" required>
+                <div class="file-info">Máximo 10 MB — Obligatorio en primer registro</div>
+            </div>
+
+            <button type="submit" class="btn-submit">🚚 Registrar Vehículo</button>
+            <div class="loading" id="loading">⏳ Registrando vehículo...</div>
+
+        </form>
+    </div><!-- /content-card -->
+
+</div>
+
+<script>
+    const API_URL = window.location.origin;
+    let usuarioActual = null;
+
+    window.addEventListener('load', function() {
+        const u = localStorage.getItem('usuario');
+        if (!u) { window.location.href = 'login.html'; return; }
+        usuarioActual = JSON.parse(u);
+        document.getElementById('usuarioNombre').textContent = '👤 ' + usuarioActual.nombre;
+        document.getElementById('proveedorAsignado').textContent = usuarioActual.proveedor || 'No asignado';
+    });
+
+    document.getElementById('vehiculoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!usuarioActual) { mostrarAlerta('❌ Usuario no logueado', 'error'); return; }
+
+        const archivos = {
+            certificadoAliado: document.getElementById('certificadoAliado').files[0],
+            certificadoLatin:  document.getElementById('certificadoLatin').files[0],
+            nit:               document.getElementById('nit').files[0],
+            pdfSoat:           document.getElementById('pdfSoat').files[0],
+            pdfTecno:          document.getElementById('pdfTecno').files[0]
+        };
+
+        // Validar archivos obligatorios
+        if (!archivos.certificadoAliado) {
+            mostrarAlerta('❌ El Certificado de Dueño Proveedor (primero) es obligatorio', 'error');
+            return;
+        }
+        if (!archivos.certificadoLatin) {
+            mostrarAlerta('❌ El Certificado de Dueño Proveedor (segundo) es obligatorio', 'error');
+            return;
+        }
+        if (!archivos.nit) {
+            mostrarAlerta('❌ La Tarjeta de propiedad es obligatoria', 'error');
+            return;
+        }
+        if (!archivos.pdfSoat) {
+            mostrarAlerta('❌ El PDF del SOAT es obligatorio', 'error');
+            return;
+        }
+        if (!archivos.pdfTecno) {
+            mostrarAlerta('❌ El PDF de la Tecnomecánica es obligatorio', 'error');
+            return;
+        }
+
+        for (let [nombre, archivo] of Object.entries(archivos)) {
+            if (archivo && archivo.size > 10 * 1024 * 1024) {
+                mostrarAlerta('❌ El archivo ' + nombre + ' es muy grande (máximo 10 MB)', 'error');
+                return;
+            }
+        }
+
+        const vehiculo = {
+            placa:     document.getElementById('placa').value.toUpperCase(),
+            tonelaje:  document.getElementById('tonelaje').value,
+            marca:     document.getElementById('marca').value,
+            modelo:    document.getElementById('modelo').value ? parseInt(document.getElementById('modelo').value) : null,
+            ciudad:    document.getElementById('ciudad').value,
+            cedula:    document.getElementById('cedula').value || null,
+            proveedor: usuarioActual.proveedor,
+            soat:          document.getElementById('soat').value          || null,
+            tecnomecanica: document.getElementById('tecnomecanica').value || null
+        };
+
+        document.getElementById('loading').style.display = 'block';
+
+        fetch(API_URL + '/vehiculos?usuario_id=' + usuarioActual.id, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(vehiculo)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('loading').style.display = 'none';
+                mostrarAlerta('❌ ' + data.error, 'error');
+            } else {
+                mostrarAlerta('✅ Vehículo registrado exitosamente', 'success');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                subirPDFs(data.vehiculo.id, archivos);
+            }
+        })
+        .catch(() => {
+            document.getElementById('loading').style.display = 'none';
+            mostrarAlerta('❌ Error al registrar vehículo', 'error');
+        });
+    });
+
+    function subirPDFs(vehiculoId, archivos) {
+        const pdfsASubir = [
+            { archivo: archivos.certificadoAliado, tipo: 'certificado_aliado' },
+            { archivo: archivos.certificadoLatin,  tipo: 'certificado_latin'  },
+            { archivo: archivos.nit,               tipo: 'nit'                },
+            { archivo: archivos.pdfSoat,  tipo: 'soat'          },
+            { archivo: archivos.pdfTecno, tipo: 'tecnomecanica' }
+        ].filter(p => p.archivo);
+
+        if (pdfsASubir.length === 0) {
+            document.getElementById('loading').style.display = 'none';
+            setTimeout(() => window.location.href = 'ver_vehiculos.html', 1500);
+            return;
+        }
+
+        let done = 0;
+        pdfsASubir.forEach(({ archivo, tipo }) => {
+            const fd = new FormData();
+            fd.append('file', archivo);
+            fetch(API_URL + '/vehiculos/' + vehiculoId + '/upload-pdf?tipo=' + tipo, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .catch(() => {})
+            .finally(() => {
+                done++;
+                if (done === pdfsASubir.length) {
+                    document.getElementById('loading').style.display = 'none';
+                    mostrarAlerta('✅ Vehículo y documentos registrados exitosamente', 'success');
+                    document.getElementById('vehiculoForm').reset();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => window.location.href = 'ver_vehiculos.html', 1500);
+                }
+            });
+        });
+    }
+
+    function mostrarAlerta(mensaje, tipo) {
+        const el = document.getElementById(tipo === 'success' ? 'alertSuccess' : 'alertError');
+        el.textContent = mensaje;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    function logout() {
+        if (confirm('¿Deseas cerrar sesión?')) {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+    }
+</script>
+
+<!-- ══ BOTÓN TUTORIAL FLOTANTE ══ -->
+<button class="tut-fab" id="tutFab" onclick="abrirTutorial()" title="Ayuda — ¿Cómo registrar un vehículo?">?</button>
+
+<!-- ══ PANEL TUTORIAL ══ -->
+<div class="tut-overlay" id="tutOverlay" onclick="if(event.target===this)cerrarTutorial()">
+  <div class="tut-panel" id="tutPanel">
+
+    <div class="tut-header">
+      <div class="tut-header-left">
+        <div class="tut-header-icon">📖</div>
+        <div>
+          <div class="tut-header-title">Guía de la página</div>
+          <div class="tut-header-sub">Registrar Vehículo</div>
+        </div>
+      </div>
+      <button class="tut-close" onclick="cerrarTutorial()">✕</button>
+    </div>
+
+    <div class="tut-body">
+
+      <!-- BLOQUE 1: Datos básicos -->
+      <div class="tut-block">
+        <div class="tut-block-title">🚚 Datos básicos del vehículo</div>
+        <div class="tut-block-desc">Campos obligatorios que identifican el vehículo en la flota.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">*</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Placa</div>
+              <div class="tut-item-desc">Identificador único del vehículo. Se guarda en mayúsculas automáticamente. No puede repetirse en el sistema.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">*</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Tonelaje</div>
+              <div class="tut-item-desc">Capacidad de carga del vehículo. Seleccioná la opción que corresponda al tipo de vehículo.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">*</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Marca y Ciudad</div>
+              <div class="tut-item-desc">Marca del fabricante y ciudad de operación principal del vehículo.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(170,176,198,0.18);color:#9aa0b8">○</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Año modelo y Cédula dueño (opcional)</div>
+              <div class="tut-item-desc">Año de fabricación del vehículo y cédula del propietario. No son obligatorios pero se recomiendan para el seguimiento.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2: SOAT -->
+      <div class="tut-block">
+        <div class="tut-block-title">🛡️ SOAT</div>
+        <div class="tut-block-desc">Seguro Obligatorio de Accidentes de Tránsito. Ambos campos son obligatorios.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">📅</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Fecha SOAT</div>
+              <div class="tut-item-desc">Fecha de vencimiento del SOAT. El administrador recibirá una alerta cuando esté por vencer o ya haya vencido.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">📄</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">PDF SOAT</div>
+              <div class="tut-item-desc">Archivo PDF del documento. Solo se aceptan archivos en formato PDF.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 3: Tecnomecánica -->
+      <div class="tut-block">
+        <div class="tut-block-title">🔩 Tecnomecánica</div>
+        <div class="tut-block-desc">Revisión técnico-mecánica y de gases. Ambos campos son obligatorios.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">📅</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Fecha Tecnomecánica</div>
+              <div class="tut-item-desc">Fecha de vencimiento de la revisión. El administrador monitorea la vigencia de todos los vehículos.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(26,75,204,0.08);color:var(--azul)">📄</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">PDF Tecnomecánica</div>
+              <div class="tut-item-desc">Archivo PDF del certificado de la revisión técnico-mecánica.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 4: Documentos PDF -->
+      <div class="tut-block">
+        <div class="tut-block-title">📁 Documentos de cumplimiento</div>
+        <div class="tut-block-desc">PDFs obligatorios que acreditan al vehículo y su propietario dentro de la operación.</div>
+        <div class="tut-items">
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">1</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Certificado de Dueño Proveedor (Aliado)</div>
+              <div class="tut-item-desc">Primer certificado que acredita al propietario como aliado de la operación.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">2</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Certificado de Dueño Proveedor (Latin)</div>
+              <div class="tut-item-desc">Segundo certificado complementario requerido para el registro.</div>
+            </div>
+          </div>
+          <div class="tut-item">
+            <div class="tut-item-icon" style="background:rgba(192,39,45,0.08);color:#9f1239">3</div>
+            <div class="tut-item-body">
+              <div class="tut-item-name">Tarjeta de propiedad</div>
+              <div class="tut-item-desc">Documento que certifica la titularidad legal del vehículo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 5: Qué pasa al registrar -->
+      <div class="tut-block">
+        <div class="tut-block-title">⏳ ¿Qué pasa después de registrar?</div>
+        <div class="tut-block-desc">Al enviar el formulario, el vehículo queda en estado <strong>Pendiente</strong>. El administrador revisa los documentos y decide si aprueba, rechaza o solicita correcciones. Recibirás una notificación de WhatsApp cuando el estado cambie.</div>
+      </div>
+
+      <div class="tut-footer">
+        <span>💡 Si tienes dudas, contacta al administrador del sistema.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .tut-fab {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: linear-gradient(140deg, rgba(26,75,204,0.92) 0%, rgba(15,45,138,0.97) 100%);
+    color: white; border: 2px solid rgba(255,255,255,0.25);
+    font-size: 1.5em; font-weight: 700; cursor: pointer;
+    box-shadow: 0 6px 24px rgba(15,45,138,0.35);
+    z-index: 900; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tut-fab:hover { transform: translateY(-3px) scale(1.07); box-shadow: 0 10px 32px rgba(15,45,138,0.45); }
+  .tut-fab.open { background: linear-gradient(140deg, rgba(192,39,45,0.88) 0%, rgba(142,26,31,0.96) 100%); transform: rotate(15deg) scale(1.05); }
+  .tut-overlay { display: none; position: fixed; inset: 0; background: rgba(15,45,138,0.35); backdrop-filter: blur(5px); z-index: 1500; align-items: flex-start; justify-content: flex-end; padding: 20px; }
+  .tut-overlay.active { display: flex; }
+  .tut-panel { width: 100%; max-width: 440px; max-height: calc(100vh - 40px); background: rgba(255,255,255,0.95); backdrop-filter: blur(24px) saturate(1.8); border-radius: 20px; border: 1.5px solid rgba(26,75,204,0.14); box-shadow: 0 24px 70px rgba(15,45,138,0.25); display: flex; flex-direction: column; overflow: hidden; animation: tutSlideIn 0.30s cubic-bezier(0.4,0,0.2,1) both; }
+  @keyframes tutSlideIn { from { opacity:0; transform: translateX(30px) scale(0.97); } to { opacity:1; transform: translateX(0) scale(1); } }
+  .tut-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 14px; background: linear-gradient(135deg,#1a4bcc 0%,#0f2d8a 100%); }
+  .tut-header-left { display: flex; align-items: center; gap: 12px; }
+  .tut-header-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
+  .tut-header-title { color: #fff; font-weight: 700; font-size: 1em; }
+  .tut-header-sub { color: rgba(255,255,255,0.7); font-size: 0.78em; }
+  .tut-close { background: rgba(255,255,255,0.15); border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 1em; display: flex; align-items: center; justify-content: center; }
+  .tut-close:hover { background: rgba(255,255,255,0.28); }
+  .tut-body { overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .tut-block { background: rgba(26,75,204,0.04); border: 1px solid rgba(26,75,204,0.10); border-radius: 14px; padding: 14px 15px; }
+  .tut-block-title { font-weight: 700; font-size: 0.85em; color: #1a4bcc; margin-bottom: 6px; letter-spacing: 0.01em; }
+  .tut-block-desc { font-size: 0.80em; color: #4a5068; line-height: 1.5; margin-bottom: 10px; }
+  .tut-items { display: flex; flex-direction: column; gap: 8px; }
+  .tut-item { display: flex; gap: 10px; align-items: flex-start; }
+  .tut-item-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1em; flex-shrink: 0; }
+  .tut-item-body { flex: 1; }
+  .tut-item-name { font-weight: 600; font-size: 0.82em; color: #1e2a4a; }
+  .tut-item-desc { font-size: 0.77em; color: #5a6380; line-height: 1.45; margin-top: 2px; }
+  .tut-footer { text-align: center; padding: 10px 0 4px; font-size: 0.76em; color: #8890aa; }
+</style>
+
+<script>
+  function abrirTutorial() {
+    document.getElementById('tutOverlay').classList.add('active');
+    document.getElementById('tutFab').classList.add('open');
+  }
+  function cerrarTutorial() {
+    document.getElementById('tutOverlay').classList.remove('active');
+    document.getElementById('tutFab').classList.remove('open');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña - Hermes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0060c2 0%, #faf4ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #faf4ff;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Indicador de pasos ── */
+        .steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+        .step-dot {
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            transition: all 0.35s ease;
+            width: 28px;
+        }
+        .step-dot.active { width: 40px; background: #667eea; }
+        .step-dot.done   { background: #28a745; width: 28px; }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header .icono {
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .header h1 {
+            font-size: 1.7em;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        .header p { color: #999; font-size: 0.92em; }
+
+        /* ── Paneles de paso ── */
+        .step-panel { display: none; }
+        .step-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Form groups ── */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Código OTP grande */
+        .otp-input {
+            text-align: center;
+            font-size: 1.8em !important;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            color: #333;
+        }
+
+        /* ── Botón principal ── */
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #0060c2 0%, #6580d7 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-primary:active  { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* ── Mensajes ── */
+        .msg {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .msg-error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .msg-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+
+        /* ── Hint ── */
+        .hint {
+            font-size: 0.83em;
+            color: #999;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .hint span {
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .hint span:hover { text-decoration: underline; }
+
+        /* ── Link volver ── */
+        .link-back {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .link-back:hover { color: #764ba2; text-decoration: underline; }
+
+        /* ── Éxito final ── */
+        .success-final { text-align: center; padding: 10px 0; }
+        .success-final .check { font-size: 3.5em; display: block; margin-bottom: 14px; }
+        .success-final h2 { color: #667eea; font-size: 1.5em; margin-bottom: 8px; }
+        .success-final p  { color: #999; font-size: 0.9em; margin-bottom: 22px; }
+
+        /* Spinner inline */
+        .spinner-sm {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <span class="icono" id="iconoHeader">🔑</span>
+        <h1 id="tituloHeader">Recuperar Contraseña</h1>
+        <p id="subtituloHeader">Te enviaremos un código a WhatsApp</p>
+    </div>
+
+    <!-- Indicador de pasos -->
+    <div class="steps" id="stepsBar">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <div class="step-dot" id="dot3"></div>
+    </div>
+
+    <!-- ── PASO 1: Teléfono ── -->
+    <div class="step-panel active" id="paso1">
+        <div id="msg1error" class="msg msg-error"></div>
+        <div id="msg1ok"    class="msg msg-success"></div>
+
+        <div class="form-group">
+            <label for="telefonoInput">📱 Número de WhatsApp (código país + número):</label>
+            <input type="tel" id="telefonoInput" placeholder="ej: 573001234567" autocomplete="tel">
+        </div>
+
+        <button class="btn-primary" id="btnEnviar" onclick="enviarCodigo()">
+            Enviar código
+        </button>
+        <p class="hint">El código expira en 30 minutos</p>
+        <a href="login.html" class="link-back">← Volver al inicio de sesión</a>
+    </div>
+
+    <!-- ── PASO 2: Código ── -->
+    <div class="step-panel" id="paso2">
+        <div id="msg2error" class="msg msg-error"></div>
+
+        <div class="form-group">
+            <label for="codigoInput">🔢 Código de 6 dígitos:</label>
+            <input type="text" id="codigoInput" class="otp-input"
+                placeholder="· · · · · ·" maxlength="6"
+                inputmode="numeric" autocomplete="one-time-code">
+        </div>
+
+        <button class="btn-primary" id="btnVerificar" onclick="verificarCodigo()">
+            Verificar código
+        </button>
+        <p class="hint">
+            ¿No llegó el mensaje?
+            <span onclick="reenviar(this)">Reenviar código</span>
+        </p>
+        <a href="login.html" class="link-back">← Volver al inicio de sesión</a>
+    </div>
+
+    <!-- ── PASO 3: Nueva contraseña ── -->
+    <div class="step-panel" id="paso3">
+        <div id="msg3error" class="msg msg-error"></div>
+
+        <div class="form-group">
+            <label for="passInput">🔒 Nueva contraseña:</label>
+            <input type="password" id="passInput" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="form-group">
+            <label for="pass2Input">🔒 Confirmar contraseña:</label>
+            <input type="password" id="pass2Input" placeholder="Repite la contraseña">
+        </div>
+
+        <button class="btn-primary" id="btnReset" onclick="resetearContrasena()">
+            Guardar contraseña
+        </button>
+        <a href="login.html" class="link-back">← Volver al inicio de sesión</a>
+    </div>
+
+    <!-- ── PASO 4: Éxito ── -->
+    <div class="step-panel" id="paso4">
+        <div class="success-final">
+            <span class="check">✅</span>
+            <h2>¡Contraseña actualizada!</h2>
+            <p>Tu contraseña fue cambiada exitosamente.<br>Redirigiendo al inicio de sesión...</p>
+            <button class="btn-primary" onclick="window.location.href='login.html'">
+                Ir al Login
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API_URL = window.location.origin;
+    let telefonoGuardado = '';
+    let codigoGuardado = '';
+
+    window.addEventListener('load', () => {
+        const u = localStorage.getItem('usuario');
+        if (u) {
+            const usuario = JSON.parse(u);
+            window.location.href = usuario.rol === 'admin' ? 'admin.html' : 'ver_vehiculos.html';
+        }
+    });
+
+    async function enviarCodigo() {
+        const telefono = document.getElementById('telefonoInput').value.trim();
+        if (!telefono) { mostrarMsg('msg1error', '⚠️ Ingresa tu número de WhatsApp con código de país (ej: 573001234567)'); return; }
+
+        const btn = document.getElementById('btnEnviar');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm"></span>Enviando...';
+
+        try {
+            const data = await fetch(API_URL + '/auth/solicitar-recuperacion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefono })
+            }).then(r => r.json());
+
+            if (data.error) {
+                mostrarMsg('msg1error', '❌ ' + data.error);
+            } else {
+                telefonoGuardado = telefono;
+                mostrarMsg('msg1ok', '✅ Código enviado por WhatsApp. Revisa tu teléfono.');
+                setTimeout(() => irPaso(2), 1300);
+            }
+        } catch(e) {
+            mostrarMsg('msg1error', '❌ Error de conexión. Intenta de nuevo.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Enviar código';
+        }
+    }
+
+    async function reenviar(el) {
+        el.textContent = 'Enviando...';
+        el.style.pointerEvents = 'none';
+        try {
+            await fetch(API_URL + '/auth/solicitar-recuperacion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefono: telefonoGuardado })
+            });
+            el.textContent = '✔ Enviado';
+            setTimeout(() => { el.textContent = 'Reenviar código'; el.style.pointerEvents = 'auto'; }, 3000);
+        } catch(e) {
+            el.textContent = 'Reenviar código';
+            el.style.pointerEvents = 'auto';
+        }
+    }
+
+    async function verificarCodigo() {
+        const codigo = document.getElementById('codigoInput').value.trim();
+        if (codigo.length < 6) { mostrarMsg('msg2error', '⚠️ Ingresa el código completo de 6 dígitos'); return; }
+
+        const btn = document.getElementById('btnVerificar');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm"></span>Verificando...';
+
+        try {
+            const data = await fetch(API_URL + '/auth/verificar-codigo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefono: telefonoGuardado, codigo })
+            }).then(r => r.json());
+
+            if (data.error) {
+                mostrarMsg('msg2error', '❌ ' + data.error);
+            } else {
+                codigoGuardado = codigo;
+                irPaso(3);
+            }
+        } catch(e) {
+            mostrarMsg('msg2error', '❌ Error de conexión. Intenta de nuevo.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Verificar código';
+        }
+    }
+
+    async function resetearContrasena() {
+        const pass  = document.getElementById('passInput').value;
+        const pass2 = document.getElementById('pass2Input').value;
+
+        if (pass.length < 6) { mostrarMsg('msg3error', '⚠️ La contraseña debe tener al menos 6 caracteres'); return; }
+        if (pass !== pass2)  { mostrarMsg('msg3error', '⚠️ Las contraseñas no coinciden'); return; }
+
+        const btn = document.getElementById('btnReset');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm"></span>Guardando...';
+
+        try {
+            const data = await fetch(API_URL + '/auth/resetear-contrasena', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefono: telefonoGuardado, codigo: codigoGuardado, nueva_contrasena: pass })
+            }).then(r => r.json());
+
+            if (data.error) {
+                mostrarMsg('msg3error', '❌ ' + data.error);
+            } else {
+                irPaso(4);
+                setTimeout(() => window.location.href = 'login.html', 3500);
+            }
+        } catch(e) {
+            mostrarMsg('msg3error', '❌ Error de conexión. Intenta de nuevo.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Guardar contraseña';
+        }
+    }
+
+    const iconos     = { 1:'🔑', 2:'📩', 3:'🔒', 4:'✅' };
+    const titulos    = { 1:'Recuperar Contraseña', 2:'Ingresa el Código', 3:'Nueva Contraseña', 4:'¡Listo!' };
+    const subtitulos = { 1:'Te enviaremos un código a WhatsApp', 2:'Código enviado a tu WhatsApp', 3:'Elige una contraseña segura', 4:'' };
+
+    function irPaso(n) {
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('paso' + n).classList.add('active');
+
+        ['dot1','dot2','dot3'].forEach((id, i) => {
+            const dot = document.getElementById(id);
+            dot.className = 'step-dot';
+            if (i + 1 < n)        dot.classList.add('done');
+            else if (i + 1 === n) dot.classList.add('active');
+        });
+
+        document.getElementById('iconoHeader').textContent     = iconos[n]     || '🔑';
+        document.getElementById('tituloHeader').textContent    = titulos[n]    || '';
+        document.getElementById('subtituloHeader').textContent = subtitulos[n] || '';
+        document.getElementById('stepsBar').style.display      = n === 4 ? 'none' : 'flex';
+    }
+
+    function mostrarMsg(id, texto) {
+        const el = document.getElementById(id);
+        el.textContent = texto;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        if (document.getElementById('paso1').classList.contains('active')) enviarCodigo();
+        else if (document.getElementById('paso2').classList.contains('active')) verificarCodigo();
+        else if (document.getElementById('paso3').classList.contains('active')) resetearContrasena();
+    });
+</script>
+</body>
+</html>
