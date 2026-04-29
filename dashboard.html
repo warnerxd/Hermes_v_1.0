@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a4bcc">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <title>Mi Panel — Hermes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+        :root {
+            --azul:       #1a4bcc;
+            --azul-dark:  #0f2d8a;
+            --azul-mid:   #2158e0;
+            --rojo:       #c0272d;
+            --rojo-dark:  #8e1a1f;
+            --verde:      #0f9b6e;
+            --naranja:    #d46b08;
+            --blanco:     #ffffff;
+            --gris-claro: #f4f6fb;
+            --gris-texto: #3a4560;
+            --gris-input: #e8ecf5;
+            --dur:        0.28s;
+            --ease:       cubic-bezier(0.4,0,0.2,1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse 90% 70% at 20% 10%, rgba(26,75,204,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 85% 80%, rgba(33,88,224,0.08) 0%, transparent 50%),
+                #e8ecf5;
+            padding: 20px 16px 48px;
+        }
+
+        .container { max-width: 980px; margin: 0 auto; }
+
+        /* ══ HEADER ══ */
+        .header {
+            background: linear-gradient(140deg, rgba(26,75,204,0.92) 0%, rgba(15,45,138,0.97) 100%);
+            backdrop-filter: blur(20px) saturate(1.5);
+            border-radius: 20px;
+            padding: 22px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+            box-shadow: 0 12px 40px rgba(15,45,138,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-icon {
+            width: 44px; height: 44px; background: rgba(255,255,255,0.15);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.35em;
+        }
+        .header-title h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.45em; font-weight: 700; color: #fff; line-height: 1.1;
+        }
+        .header-title p { font-size: 0.80em; color: rgba(255,255,255,0.6); margin-top: 2px; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .user-badge {
+            font-size: 0.84em; font-weight: 600; color: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.12); padding: 6px 13px;
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.18);
+        }
+        .btn-hdr {
+            background: rgba(255,255,255,0.13); color: white;
+            padding: 7px 14px; border: 1.5px solid rgba(255,255,255,0.22);
+            border-radius: 8px; cursor: pointer;
+            font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 0.84em;
+            transition: all var(--dur) var(--ease);
+        }
+        .btn-hdr:hover { background: rgba(255,255,255,0.22); }
+        .btn-hdr.rojo { background: rgba(192,39,45,0.75); }
+        .btn-hdr.rojo:hover { background: rgba(142,26,31,0.85); }
+
+        /* ══ NAV PILLS ══ */
+        .dash-nav {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .dash-nav a {
+            padding: 8px 16px; border-radius: 10px;
+            font-weight: 600; font-size: 0.86em;
+            text-decoration: none; color: var(--gris-texto);
+            background: rgba(255,255,255,0.70);
+            border: 1.5px solid rgba(26,75,204,0.10);
+            transition: all var(--dur) var(--ease);
+        }
+        .dash-nav a:hover { background: rgba(255,255,255,0.95); border-color: rgba(26,75,204,0.25); }
+        .dash-nav a.activa {
+            background: var(--azul); color: white;
+            border-color: var(--azul);
+            box-shadow: 0 4px 14px rgba(26,75,204,0.30);
+        }
+
+        /* ══ KPI CARDS ══ */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 640px) { .kpi-row { grid-template-columns: repeat(2,1fr); } }
+
+        .kpi {
+            background: white; border-radius: 16px;
+            padding: 18px 16px; position: relative; overflow: hidden;
+            box-shadow: 0 2px 14px rgba(26,75,204,0.08);
+            border: 1.5px solid transparent;
+            transition: transform var(--dur) var(--ease);
+        }
+        .kpi:hover { transform: translateY(-2px); }
+        .kpi-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.4em; font-weight: 800; line-height: 1;
+            margin-bottom: 4px;
+        }
+        .kpi-label { font-size: 0.76em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7a84a0; }
+        .kpi-icon {
+            position: absolute; right: 14px; top: 14px;
+            font-size: 1.6em; opacity: 0.18;
+        }
+        .kpi-deco {
+            position: absolute; bottom: -12px; right: -12px;
+            width: 60px; height: 60px; border-radius: 50%;
+            opacity: 0.08;
+        }
+        .kpi-verde  { border-color: rgba(15,155,110,0.25); }
+        .kpi-verde  .kpi-num { color: var(--verde); }
+        .kpi-verde  .kpi-deco { background: var(--verde); }
+        .kpi-naranja { border-color: rgba(212,107,8,0.25); }
+        .kpi-naranja .kpi-num { color: var(--naranja); }
+        .kpi-naranja .kpi-deco { background: var(--naranja); }
+        .kpi-rojo   { border-color: rgba(192,39,45,0.25); }
+        .kpi-rojo   .kpi-num { color: var(--rojo); }
+        .kpi-rojo   .kpi-deco { background: var(--rojo); }
+        .kpi-azul   { border-color: rgba(26,75,204,0.20); }
+        .kpi-azul   .kpi-num { color: var(--azul); }
+        .kpi-azul   .kpi-deco { background: var(--azul); }
+
+        /* ══ SECCION ══ */
+        .seccion {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(20px);
+            border-radius: 18px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(26,75,204,0.09);
+            box-shadow: 0 3px 18px rgba(26,75,204,0.07);
+            overflow: hidden;
+        }
+        .sec-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 22px; cursor: pointer;
+            user-select: none;
+        }
+        .sec-header-left { display: flex; align-items: center; gap: 10px; }
+        .sec-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1em;
+        }
+        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.08em; font-weight: 700; color: var(--gris-texto); }
+        .sec-badge {
+            background: rgba(26,75,204,0.10); color: var(--azul);
+            font-size: 0.74em; font-weight: 800; padding: 3px 10px;
+            border-radius: 20px; letter-spacing: 0.02em;
+        }
+        .sec-badge.rojo  { background: rgba(192,39,45,0.10); color: var(--rojo); }
+        .sec-badge.verde { background: rgba(15,155,110,0.10); color: var(--verde); }
+        .sec-badge.naranja { background: rgba(212,107,8,0.10); color: var(--naranja); }
+        .chevron { font-size: 0.80em; color: #aab0c6; transition: transform 0.25s; }
+        .seccion.open .chevron { transform: rotate(180deg); }
+        .sec-body { display: none; padding: 0 22px 20px; }
+        .seccion.open .sec-body { display: block; }
+
+        /* ══ ALERTAS DOCUMENTOS ══ */
+        .alerta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+            gap: 10px; padding-top: 4px;
+        }
+        .alerta-card {
+            border-radius: 12px; padding: 13px 15px;
+            border: 1.5px solid;
+        }
+        .alerta-card.vencido { background: rgba(192,39,45,0.05); border-color: rgba(192,39,45,0.22); }
+        .alerta-card.proximo { background: rgba(212,107,8,0.05); border-color: rgba(212,107,8,0.22); }
+        .alerta-placa {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.10em; font-weight: 800;
+            margin-bottom: 6px; white-space: nowrap;
+        }
+        .alerta-card.vencido .alerta-placa { color: var(--rojo); }
+        .alerta-card.proximo .alerta-placa { color: var(--naranja); }
+        .alerta-fila { display: flex; justify-content: space-between; font-size: 0.79em; color: #5a6380; margin-top: 4px; }
+        .alerta-fila strong { color: #3a4560; }
+        .badge-doc {
+            font-size: 0.73em; font-weight: 700; padding: 2px 8px; border-radius: 6px;
+        }
+        .badge-doc.v { background: rgba(192,39,45,0.12); color: var(--rojo); }
+        .badge-doc.p { background: rgba(212,107,8,0.12); color: var(--naranja); }
+        .badge-doc.ok { background: rgba(15,155,110,0.12); color: var(--verde); }
+
+        /* ══ ESTADO MES ACTUAL ══ */
+        .mes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+            gap: 10px; padding-top: 4px;
+        }
+        .mes-card {
+            background: var(--gris-claro); border-radius: 12px;
+            padding: 12px 14px; border: 1.5px solid rgba(26,75,204,0.08);
+        }
+        .mes-card-placa {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.05em; font-weight: 800; color: var(--azul);
+            margin-bottom: 8px; white-space: nowrap;
+        }
+        .mes-items { display: flex; flex-direction: column; gap: 5px; }
+        .mes-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.79em; color: #5a6380; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .dot.ok  { background: var(--verde); }
+        .dot.no  { background: var(--rojo); }
+
+        /* ══ VEHICULOS ══ */
+        .veh-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+            gap: 12px; padding-top: 4px;
+        }
+        .veh-card {
+            background: white; border-radius: 14px;
+            border: 1.5px solid rgba(26,75,204,0.09);
+            padding: 16px 18px;
+            box-shadow: 0 2px 10px rgba(26,75,204,0.06);
+            transition: transform var(--dur) var(--ease);
+        }
+        .veh-card:hover { transform: translateY(-2px); }
+        .veh-card.rechazado { border-color: rgba(192,39,45,0.30); background: rgba(192,39,45,0.02); }
+        .veh-card.pendiente-apro { border-color: rgba(212,107,8,0.30); background: rgba(212,107,8,0.02); }
+        .veh-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .veh-placa {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.30em; font-weight: 800; color: var(--gris-texto);
+            white-space: nowrap;
+        }
+        .estado-badge {
+            font-size: 0.72em; font-weight: 700; padding: 3px 10px;
+            border-radius: 20px; white-space: nowrap;
+        }
+        .estado-badge.activo   { background: rgba(15,155,110,0.12); color: var(--verde); }
+        .estado-badge.pendiente { background: rgba(212,107,8,0.12); color: var(--naranja); }
+        .estado-badge.rechazado { background: rgba(192,39,45,0.12); color: var(--rojo); }
+        .veh-info { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .veh-info-row { display: flex; justify-content: space-between; font-size: 0.80em; color: #5a6380; }
+        .veh-info-row strong { color: #3a4560; }
+        .motivo-rechazo {
+            background: rgba(192,39,45,0.06); border: 1px solid rgba(192,39,45,0.18);
+            border-radius: 8px; padding: 8px 10px; font-size: 0.78em;
+            color: var(--rojo); margin-bottom: 10px; line-height: 1.4;
+        }
+        .veh-acciones { display: flex; gap: 7px; flex-wrap: wrap; }
+        .btn-accion {
+            flex: 1; min-width: 90px; padding: 7px 10px; border-radius: 9px;
+            font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 0.78em;
+            cursor: pointer; border: 1.5px solid; text-align: center;
+            text-decoration: none; transition: all 0.20s;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .btn-accion.azul {
+            background: rgba(26,75,204,0.08); color: var(--azul); border-color: rgba(26,75,204,0.20);
+        }
+        .btn-accion.azul:hover { background: rgba(26,75,204,0.16); }
+        .btn-accion.verde {
+            background: rgba(15,155,110,0.08); color: var(--verde); border-color: rgba(15,155,110,0.20);
+        }
+        .btn-accion.verde:hover { background: rgba(15,155,110,0.16); }
+        .btn-accion.naranja {
+            background: rgba(212,107,8,0.08); color: var(--naranja); border-color: rgba(212,107,8,0.20);
+        }
+        .btn-accion.naranja:hover { background: rgba(212,107,8,0.16); }
+
+        /* ══ ESTADO MES BARRA ══ */
+        .progreso-wrap { margin-bottom: 16px; }
+        .progreso-label { display: flex; justify-content: space-between; font-size: 0.80em; font-weight: 700; color: #5a6380; margin-bottom: 6px; }
+        .progreso-track { height: 8px; background: var(--gris-input); border-radius: 99px; overflow: hidden; }
+        .progreso-fill { height: 100%; border-radius: 99px; transition: width 0.7s var(--ease); }
+
+        /* ══ EMPTY ══ */
+        .empty { text-align: center; padding: 28px 0; color: #aab0c6; font-size: 0.90em; font-weight: 600; }
+
+        /* ══ LOADER ══ */
+        .loader { text-align: center; padding: 32px; color: #8a94b0; font-size: 0.88em; }
+
+        /* ══ TOAST ══ */
+        #toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1e2a4a; color: white; padding: 11px 22px;
+            border-radius: 12px; font-size: 0.88em; font-weight: 600;
+            opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ══ HEADER ══ -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">🏠</div>
+            <div class="header-title">
+                <h1>Mi Panel</h1>
+                <p id="headerSub">Hermes — Panel de Proveedor</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="user-badge" id="userBadge">Cargando…</span>
+            <button class="btn-hdr rojo" onclick="logout()">Salir</button>
+        </div>
+    </div>
+
+    <!-- ══ NAVEGACIÓN ══ -->
+    <nav class="dash-nav">
+        <a href="dashboard.html" class="activa">🏠 Inicio</a>
+        <a href="ver_vehiculos.html">🚚 Mis vehículos</a>
+        <a href="historial_vehiculos.html">📋 Historial</a>
+        <a href="crear_vehiculo.html">➕ Registrar vehículo</a>
+    </nav>
+
+    <!-- ══ KPIs ══ -->
+    <div class="kpi-row">
+        <div class="kpi kpi-verde">
+            <div class="kpi-num" id="kpiActivos">—</div>
+            <div class="kpi-label">Activos</div>
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-deco"></div>
+        </div>
+        <div class="kpi kpi-naranja">
+            <div class="kpi-num" id="kpiPendientes">—</div>
+            <div class="kpi-label">Pendientes</div>
+            <div class="kpi-icon">⏳</div>
+            <div class="kpi-deco"></div>
+        </div>
+        <div class="kpi kpi-rojo">
+            <div class="kpi-num" id="kpiRechazados">—</div>
+            <div class="kpi-label">Rechazados</div>
+            <div class="kpi-icon">🚫</div>
+            <div class="kpi-deco"></div>
+        </div>
+        <div class="kpi kpi-azul">
+            <div class="kpi-num" id="kpiAlertas">—</div>
+            <div class="kpi-label">Alertas docs</div>
+            <div class="kpi-icon">⚠️</div>
+            <div class="kpi-deco"></div>
+        </div>
+    </div>
+
+    <!-- ══ ALERTAS DOCUMENTOS ══ -->
+    <div class="seccion open" id="secAlertas" style="display:none;">
+        <div class="sec-header" onclick="toggleSec('secAlertas')">
+            <div class="sec-header-left">
+                <div class="sec-icon" style="background:rgba(192,39,45,0.10);">🛡️</div>
+                <span class="sec-title">Alertas — SOAT / Tecnomecánica</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="sec-badge rojo" id="badgeAlertas">0</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="sec-body">
+            <div class="alerta-grid" id="alertaGrid"></div>
+        </div>
+    </div>
+
+    <!-- ══ ESTADO MES ACTUAL ══ -->
+    <div class="seccion open" id="secMes">
+        <div class="sec-header" onclick="toggleSec('secMes')">
+            <div class="sec-header-left">
+                <div class="sec-icon" style="background:rgba(26,75,204,0.10);">📅</div>
+                <span class="sec-title">Estado documental — <span id="mesTitulo">este mes</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="sec-badge" id="badgeMes">—</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="sec-body">
+            <div class="progreso-wrap">
+                <div class="progreso-label">
+                    <span>Cumplimiento del mes</span>
+                    <span id="progresoLabel" style="color:var(--azul);font-weight:800;">0%</span>
+                </div>
+                <div class="progreso-track">
+                    <div class="progreso-fill" id="progresoFill" style="width:0%;background:var(--azul);"></div>
+                </div>
+            </div>
+            <div class="mes-grid" id="mesGrid"><div class="loader">Cargando…</div></div>
+        </div>
+    </div>
+
+    <!-- ══ MIS VEHÍCULOS ══ -->
+    <div class="seccion open" id="secVehiculos">
+        <div class="sec-header" onclick="toggleSec('secVehiculos')">
+            <div class="sec-header-left">
+                <div class="sec-icon" style="background:rgba(26,75,204,0.10);">🚚</div>
+                <span class="sec-title">Mis vehículos</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="sec-badge" id="badgeVeh">0</span>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div class="sec-body">
+            <div class="veh-grid" id="vehGrid"><div class="loader">Cargando…</div></div>
+        </div>
+    </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+    const API_URL  = window.location.origin;
+    const MESES    = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    let   _vehiculos   = [];
+    let   _historiales = {};   // {vehiculo_id: [historial]}
+
+    /* ── Auth ── */
+    window.addEventListener('load', async () => {
+        const raw = localStorage.getItem('usuario');
+        if (!raw) { location.href = 'login.html'; return; }
+        const usuario = JSON.parse(raw);
+        if (usuario.rol === 'admin') { location.href = 'admin.html'; return; }
+
+        const nombre = usuario.nombre || usuario.proveedor || usuario.email || 'Usuario';
+        document.getElementById('userBadge').textContent  = '👤 ' + nombre;
+        document.getElementById('headerSub').textContent  = usuario.proveedor || 'Hermes — Panel de Proveedor';
+        document.getElementById('mesTitulo').textContent  =
+            MESES[new Date().getMonth() + 1] + ' ' + new Date().getFullYear();
+
+        await cargarDatos(usuario.id);
+    });
+
+    function logout() {
+        if (confirm('¿Deseas cerrar sesión?')) {
+            localStorage.removeItem('usuario');
+            location.href = 'login.html';
+        }
+    }
+
+    function toggleSec(id) {
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    function toast(msg, color) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.style.background = color || '#1e2a4a';
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    /* ── Carga principal ── */
+    async function cargarDatos(usuarioId) {
+        try {
+            const data = await fetch(API_URL + '/vehiculos/' + usuarioId).then(r => r.json());
+            _vehiculos = data.vehiculos || [];
+
+            // Cargar historiales en paralelo
+            const proms = _vehiculos.map(v =>
+                fetch(API_URL + '/historial-vehiculos/' + v.id)
+                    .then(r => r.json()).catch(() => ({ historial: [] }))
+            );
+            const results = await Promise.all(proms);
+            _vehiculos.forEach((v, i) => { _historiales[v.id] = results[i].historial || []; });
+
+            renderKpis();
+            renderAlertas();
+            renderMesActual();
+            renderVehiculos();
+        } catch(e) {
+            toast('❌ Error al cargar datos', '#c0272d');
+        }
+    }
+
+    /* ── KPIs ── */
+    function renderKpis() {
+        const activos    = _vehiculos.filter(v => v.activo === 1).length;
+        const pendientes = _vehiculos.filter(v => v.activo === 0).length;
+        const rechazados = _vehiculos.filter(v => v.activo === -1).length;
+
+        const alertas = contarAlertasDocs();
+
+        document.getElementById('kpiActivos').textContent    = activos;
+        document.getElementById('kpiPendientes').textContent = pendientes;
+        document.getElementById('kpiRechazados').textContent = rechazados;
+        document.getElementById('kpiAlertas').textContent    = alertas;
+        document.getElementById('badgeVeh').textContent      = _vehiculos.length + ' vehículo' + (_vehiculos.length !== 1 ? 's' : '');
+    }
+
+    /* ── Alertas SOAT / Tecno ── */
+    function calcDoc(fechaStr) {
+        if (!fechaStr) return { estado: 'sin', dr: null };
+        const hoy  = new Date(); hoy.setHours(0,0,0,0);
+        const fecha = new Date(fechaStr + 'T00:00:00');
+        const expira = new Date(fecha); expira.setFullYear(expira.getFullYear() + 1);
+        const dr = Math.floor((expira - hoy) / 86400000);
+        return { dr, estado: dr < 0 ? 'vencido' : dr <= 30 ? 'proximo' : 'vigente' };
+    }
+
+    function contarAlertasDocs() {
+        return _vehiculos.filter(v => {
+            const s = calcDoc(v.soat), t = calcDoc(v.tecnomecanica);
+            return s.estado !== 'vigente' || t.estado !== 'vigente';
+        }).length;
+    }
+
+    function renderAlertas() {
+        const alertas = _vehiculos.map(v => {
+            const soat  = calcDoc(v.soat);
+            const tecno = calcDoc(v.tecnomecanica);
+            const urgente = soat.estado === 'vencido'  || tecno.estado === 'vencido'
+                         || soat.estado === 'sin'       || tecno.estado === 'sin';
+            const proximo = soat.estado === 'proximo'  || tecno.estado === 'proximo';
+            if (!urgente && !proximo) return null;
+            return { v, soat, tecno, urgente };
+        }).filter(Boolean).sort((a,b) => b.urgente - a.urgente);
+
+        const sec = document.getElementById('secAlertas');
+        const badge = document.getElementById('badgeAlertas');
+        badge.textContent = alertas.length;
+        if (alertas.length === 0) { sec.style.display = 'none'; return; }
+        sec.style.display = 'block';
+
+        function badgeDoc(cal, sin) {
+            if (cal.estado === 'sin')      return `<span class="badge-doc v">Sin ${sin}</span>`;
+            if (cal.estado === 'vencido')  return `<span class="badge-doc v">Vencido (${cal.dr}d)</span>`;
+            if (cal.estado === 'proximo')  return `<span class="badge-doc p">Vence en ${cal.dr}d</span>`;
+            return `<span class="badge-doc ok">Vigente</span>`;
+        }
+
+        document.getElementById('alertaGrid').innerHTML = alertas.map(({ v, soat, tecno, urgente }) => `
+            <div class="alerta-card ${urgente ? 'vencido' : 'proximo'}">
+                <div class="alerta-placa">🚚 ${v.placa}</div>
+                <div class="alerta-fila">
+                    <span><strong>🛡️ SOAT</strong></span>
+                    ${badgeDoc(soat, 'SOAT')}
+                </div>
+                <div class="alerta-fila">
+                    <span><strong>🔧 Tecno</strong></span>
+                    ${badgeDoc(tecno, 'Tecno')}
+                </div>
+                <div class="alerta-fila" style="margin-top:8px;">
+                    <a href="ver_vehiculos.html" class="btn-accion azul" style="flex:unset;width:100%;font-size:0.75em;">
+                        📄 Actualizar documentos
+                    </a>
+                </div>
+            </div>`).join('');
+    }
+
+    /* ── Estado mes actual ── */
+    function renderMesActual() {
+        const hoy = new Date();
+        const mes = hoy.getMonth() + 1;
+        const año = hoy.getFullYear();
+        const activos = _vehiculos.filter(v => v.activo === 1);
+
+        if (activos.length === 0) {
+            document.getElementById('mesGrid').innerHTML = '<div class="empty">Sin vehículos activos</div>';
+            document.getElementById('badgeMes').textContent = '0 vehículos';
+            return;
+        }
+
+        let conPreop = 0, conMant = 0;
+        const cards = activos.map(v => {
+            const hist = _historiales[v.id] || [];
+            const reg  = hist.find(h => h.mes === mes && h.año === año);
+            const tienePreop = !!(reg?.pdf_preoperacional);
+            const tieneMant  = !!(reg?.pdf_mantenimiento);
+            if (tienePreop) conPreop++;
+            if (tieneMant)  conMant++;
+            return `
+            <div class="mes-card">
+                <div class="mes-card-placa">🚚 ${v.placa}</div>
+                <div class="mes-items">
+                    <div class="mes-item">
+                        <span>📋 Preoperacional</span>
+                        <span style="display:flex;align-items:center;gap:5px;">
+                            <span class="dot ${tienePreop ? 'ok' : 'no'}"></span>
+                            <span style="font-weight:700;color:${tienePreop ? 'var(--verde)' : 'var(--rojo)'}">
+                                ${tienePreop ? 'Cargado' : 'Faltante'}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="mes-item">
+                        <span>🔧 Mantenimiento</span>
+                        <span style="display:flex;align-items:center;gap:5px;">
+                            <span class="dot ${tieneMant ? 'ok' : 'no'}"></span>
+                            <span style="font-weight:700;color:${tieneMant ? 'var(--verde)' : 'var(--rojo)'}">
+                                ${tieneMant ? 'Cargado' : 'Faltante'}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        const pct = Math.round(((conPreop + conMant) / (activos.length * 2)) * 100);
+        const color = pct >= 80 ? 'var(--verde)' : pct >= 40 ? 'var(--naranja)' : 'var(--rojo)';
+
+        document.getElementById('badgeMes').textContent   = `${conPreop}/${activos.length} completos`;
+        document.getElementById('progresoLabel').textContent = pct + '%';
+        document.getElementById('progresoLabel').style.color  = color;
+        document.getElementById('progresoFill').style.width    = pct + '%';
+        document.getElementById('progresoFill').style.background = color;
+        document.getElementById('mesGrid').innerHTML = cards;
+    }
+
+    /* ── Mis vehículos ── */
+    function renderVehiculos() {
+        if (_vehiculos.length === 0) {
+            document.getElementById('vehGrid').innerHTML = `
+                <div class="empty" style="grid-column:1/-1;">
+                    Sin vehículos registrados.
+                    <br><a href="crear_vehiculo.html" style="color:var(--azul);font-weight:700;margin-top:8px;display:inline-block;">➕ Registrar mi primer vehículo</a>
+                </div>`;
+            return;
+        }
+
+        const html = _vehiculos.map(v => {
+            const estadoTxt  = v.activo === 1 ? 'Activo' : v.activo === 0 ? 'Pendiente' : 'Rechazado';
+            const estadoCls  = v.activo === 1 ? 'activo' : v.activo === 0 ? 'pendiente' : 'rechazado';
+            const cardCls    = v.activo === -1 ? 'rechazado' : v.activo === 0 ? 'pendiente-apro' : '';
+            const hist       = _historiales[v.id] || [];
+            const ultimoHist = hist.length > 0
+                ? hist.sort((a,b) => (b.año*100+b.mes) - (a.año*100+a.mes))[0]
+                : null;
+            const ultimoMes  = ultimoHist ? `${MESES[ultimoHist.mes]} ${ultimoHist.año}` : '—';
+
+            const soatRes  = calcDoc(v.soat);
+            const tecnoRes = calcDoc(v.tecnomecanica);
+
+            function docLabel(res, campo) {
+                if (res.estado === 'sin')     return `<span style="color:var(--rojo);font-weight:700;">Sin ${campo}</span>`;
+                if (res.estado === 'vencido') return `<span style="color:var(--rojo);font-weight:700;">Vencido</span>`;
+                if (res.estado === 'proximo') return `<span style="color:var(--naranja);font-weight:700;">Vence en ${res.dr}d</span>`;
+                return `<span style="color:var(--verde);font-weight:700;">Vigente</span>`;
+            }
+
+            return `
+            <div class="veh-card ${cardCls}">
+                <div class="veh-card-top">
+                    <div class="veh-placa">🚚 ${v.placa}</div>
+                    <span class="estado-badge ${estadoCls}">${estadoTxt}</span>
+                </div>
+                <div class="veh-info">
+                    <div class="veh-info-row"><span>Marca / Modelo</span><strong>${v.marca || '—'} ${v.modelo || ''}</strong></div>
+                    <div class="veh-info-row"><span>Tonelaje</span><strong>${v.tonelaje || '—'}</strong></div>
+                    <div class="veh-info-row"><span>Ciudad</span><strong>${v.ciudad || '—'}</strong></div>
+                    <div class="veh-info-row"><span>🛡️ SOAT</span>${docLabel(soatRes,'SOAT')}</div>
+                    <div class="veh-info-row"><span>🔧 Tecno</span>${docLabel(tecnoRes,'Tecno')}</div>
+                    <div class="veh-info-row"><span>📋 Último historial</span><strong>${ultimoMes}</strong></div>
+                </div>
+                ${v.motivo_rechazo ? `<div class="motivo-rechazo">🚫 <strong>Motivo rechazo:</strong> ${v.motivo_rechazo}</div>` : ''}
+                <div class="veh-acciones">
+                    <a href="historial_vehiculos.html?id=${v.id}&placa=${encodeURIComponent(v.placa)}" class="btn-accion azul">📋 Historial</a>
+                    <a href="ver_vehiculos.html" class="btn-accion verde">✏️ Editar</a>
+                    ${v.activo === 1 ? `<a href="ver_vehiculos.html" class="btn-accion naranja">📅 Preop</a>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('vehGrid').innerHTML = html;
+    }
+</script>
+
+<script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+</script>
+</body>
+</html>

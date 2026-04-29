@@ -331,6 +331,7 @@
             font-family: 'Barlow Condensed', sans-serif;
             font-size: 1.25em; font-weight: 700;
             color: var(--gris-texto); letter-spacing: 0.04em;
+            white-space: nowrap;
         }
         .dot-pendiente {
             width: 13px; height: 13px; border-radius: 50%;
@@ -780,6 +781,7 @@
             border: 1px solid rgba(26,75,204,0.15);
             padding: 3px 10px; border-radius: 6px;
             color: var(--azul); letter-spacing: 0.04em;
+            white-space: nowrap;
         }
 
         /* Badges circulares para doc */
@@ -989,6 +991,41 @@
             background: rgba(255,255,255,0.28);
             transform: translateY(-1px);
         }
+        /* ══ ZONA INFORME (secciones controladas por filtros) ══ */
+        .zona-informe-divider {
+            display: flex; align-items: center; gap: 14px;
+            margin: 22px 0 14px;
+        }
+        .zona-informe-divider-line {
+            flex: 1; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(26,75,204,0.18), transparent);
+            border-radius: 2px;
+        }
+        .zona-informe-divider-label {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(26,75,204,0.07);
+            border: 1.5px solid rgba(26,75,204,0.15);
+            border-radius: 20px; padding: 6px 16px;
+            white-space: nowrap;
+        }
+        .zona-informe-divider-icon { font-size: 0.95em; }
+        .zona-informe-divider-text {
+            font-size: 0.76em; font-weight: 800; color: var(--azul);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .zona-informe-hint {
+            font-size: 0.72em; color: #8a94b0; font-weight: 600;
+        }
+        .zona-informe {
+            background: rgba(26,75,204,0.025);
+            border: 1.5px solid rgba(26,75,204,0.10);
+            border-radius: 22px;
+            padding: 14px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        /* Dentro de la zona, quitar margin-bottom de cada seccion */
+        .zona-informe > .seccion { margin-bottom: 0; }
+
         /* ══ FILTROS MEJORADOS ══ */
         .filtros-panel {
             background: rgba(26,75,204,0.03);
@@ -1019,6 +1056,54 @@
             outline: none; background: #fff;
             border-color: var(--azul); box-shadow: 0 0 0 3px rgba(26,75,204,0.10);
         }
+        /* ══ BARRA FILTRO GLOBAL ══ */
+        .filtro-global-bar {
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            border-radius: 16px;
+            padding: 12px 22px;
+            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 24px rgba(26,75,204,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1.5px solid rgba(26,75,204,0.12);
+            position: sticky; top: 10px; z-index: 300;
+        }
+        .fg-label {
+            font-size: 0.75em; font-weight: 800; color: var(--azul);
+            text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap;
+        }
+        .fg-sel {
+            flex: 1; min-width: 200px; max-width: 340px;
+            padding: 9px 14px; border-radius: 10px;
+            border: 1.5px solid var(--gris-input);
+            font-family: 'Barlow', sans-serif; font-size: 0.93em;
+            font-weight: 600; color: var(--gris-texto);
+            background: var(--gris-claro); cursor: pointer; outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur);
+        }
+        .fg-sel:focus { border-color: var(--azul-mid); box-shadow: 0 0 0 3px rgba(26,75,204,0.10); }
+        .fg-pill {
+            padding: 5px 14px; border-radius: 20px;
+            background: rgba(26,75,204,0.10); color: var(--azul);
+            font-size: 0.80em; font-weight: 800;
+            display: none; white-space: nowrap;
+        }
+        .fg-pill.on { display: inline-block; }
+        .fg-clear {
+            padding: 7px 14px; border-radius: 8px;
+            border: 1.5px solid rgba(192,39,45,0.22);
+            background: rgba(192,39,45,0.06); color: var(--rojo);
+            font-size: 0.82em; font-weight: 700; cursor: pointer;
+            display: none; transition: background var(--dur);
+        }
+        .fg-clear.on { display: inline-block; }
+        .fg-clear:hover { background: rgba(192,39,45,0.14); }
+        .fg-total {
+            margin-left: auto; font-size: 0.80em;
+            color: #8a94b0; font-weight: 600; white-space: nowrap;
+        }
+
         /* Barra de filtro por proveedor en panels de notificaciones */
         .panel-prov-bar {
             display: flex; align-items: center; gap: 8px;
@@ -1224,7 +1309,7 @@
         .flota-card-v2-placa {
             font-family: 'Barlow Condensed', sans-serif;
             font-size: 1.08em; font-weight: 800; color: var(--azul);
-            letter-spacing: 0.05em;
+            letter-spacing: 0.05em; white-space: nowrap;
         }
         .flota-card-v2-body { padding: 12px 14px; }
         .flota-dato-v2 {
@@ -1385,7 +1470,125 @@
             .dm-radio-row  { flex-direction: column; }
         }
 
+        /* ══ CHARTS ══ */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 18px;
+        }
+        @media (max-width: 640px) { .charts-row { grid-template-columns: 1fr; } }
+
+        .chart-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px 20px 16px;
+            box-shadow: 0 2px 12px rgba(26,75,204,0.07);
+            border: 1px solid rgba(26,75,204,0.09);
+        }
+        .chart-card-title {
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #8a94b0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        /* Line chart */
+        .line-chart-wrap { position:relative; height:150px; width:100%; cursor:pointer; }
+
+        /* Panel detalle correctivos (click en punto de gráfica) */
+        .linea-detalle {
+            margin-top: 14px;
+            border-top: 1.5px solid rgba(26,75,204,0.10);
+            padding-top: 12px;
+            display: none;
+            animation: fadeSlideUp 0.22s ease;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity:0; transform:translateY(6px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .linea-detalle.open { display: block; }
+        .linea-detalle-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .linea-detalle-mes {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.05em; font-weight: 800; color: var(--azul);
+        }
+        .linea-detalle-close {
+            background: none; border: none; cursor: pointer;
+            color: #8a94b0; font-size: 1.1em; line-height: 1;
+            padding: 2px 6px; border-radius: 6px;
+            transition: background 0.18s;
+        }
+        .linea-detalle-close:hover { background: rgba(0,0,0,0.06); }
+        .linea-detalle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 8px;
+        }
+        .linea-detalle-card {
+            background: rgba(192,39,45,0.05);
+            border: 1.5px solid rgba(192,39,45,0.16);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .linea-detalle-placa {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.05em; font-weight: 800; color: #9f1239;
+            margin-bottom: 3px; white-space: nowrap;
+        }
+        .linea-detalle-prov {
+            font-size: 0.79em; color: #6b7280; font-weight: 600;
+        }
+        .linea-detalle-empty {
+            font-size: 0.84em; color: #8a94b0; text-align: center; padding: 8px 0;
+        }
+        /* Bar chart proveedores */
+        .barras-chart-wrap { position:relative; width:100%; }
+        /* Sparkline */
+        .prov-sparkline { display:block; flex-shrink:0; }
+        /* Gauge */
+        .gauge-wrap {
+            position: relative;
+            width: 200px;
+            height: 112px;
+            margin: 0 auto;
+            overflow: visible;
+        }
+        .gauge-center {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            white-space: nowrap;
+        }
+        .gauge-pct   { display:block; font-family:'Barlow Condensed',sans-serif; font-size:2.1em; font-weight:700; color:var(--gris-texto); line-height:1; }
+        .gauge-sub   { font-size:0.7em; color:#8a94b0; font-weight:600; }
+        .gauge-footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.78em;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        .gauge-footer.verde   { background:rgba(15,155,110,0.10); color:#0a6b50; }
+        .gauge-footer.naranja { background:rgba(212,107,8,0.10);  color:#92400e; }
+        .gauge-footer.rojo    { background:rgba(192,39,45,0.10);  color:#9f1239; }
+
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -1408,6 +1611,17 @@
         </div>
     </div>
 
+    <!-- ══ BARRA FILTRO GLOBAL ══ -->
+    <div class="filtro-global-bar">
+        <span class="fg-label">🏢 Proveedor</span>
+        <select id="filtroGlobalProveedor" class="fg-sel" onchange="aplicarFiltroGlobal(this.value)">
+            <option value="todos">Todos los proveedores</option>
+        </select>
+        <span class="fg-pill" id="fgPill"></span>
+        <button class="fg-clear" id="fgClear" onclick="aplicarFiltroGlobal('todos')">✕ Quitar filtro</button>
+        <span class="fg-total" id="fgTotal"></span>
+    </div>
+
     <!-- ══ SECCIÓN 0: Notificaciones Preoperacional ══ -->
     <div class="seccion seccion-roja open" id="sec-preop-notif" style="margin-bottom:16px;">
         <button class="seccion-toggle roja" onclick="toggleSeccion('sec-preop-notif')" style="background:linear-gradient(140deg,rgba(204, 114, 117, 0.88),rgba(209, 65, 72, 0.96));">
@@ -1424,12 +1638,7 @@
             <div class="seccion-inner">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
                     <p style="font-size:0.84em;color:#7a84a0;margin:0;" id="preop-notif-fecha">Hoy: —</p>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <select id="preopFiltroProveedor" class="panel-prov-sel" onchange="_renderPreopFiltrado()">
-                            <option value="todos">Todos los proveedores</option>
-                        </select>
-                        <button onclick="cargarNotifPreop()" style="padding:7px 16px;background:rgba(192,39,45,0.80);color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82em;cursor:pointer;">🔄 Actualizar</button>
-                    </div>
+                    <button onclick="cargarNotifPreop()" style="padding:7px 16px;background:rgba(192,39,45,0.80);color:white;border:none;border-radius:8px;font-weight:700;font-size:0.82em;cursor:pointer;">🔄 Actualizar</button>
                 </div>
                 <div id="preopNotifGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
                     <div style="color:#aab0c6;text-align:center;padding:24px;grid-column:1/-1;">Cargando...</div>
@@ -1452,12 +1661,6 @@
         </button>
         <div class="seccion-body">
             <div class="seccion-inner">
-                <div class="panel-prov-bar">
-                    <label>Proveedor</label>
-                    <select id="pendFiltroProveedor" class="panel-prov-sel" onchange="_renderPendFiltrado()">
-                        <option value="todos">Todos los proveedores</option>
-                    </select>
-                </div>
                 <div class="pending-grid" id="pendingGrid">
                     <div class="no-pending">Cargando...</div>
                 </div>
@@ -1498,16 +1701,26 @@
         </button>
         <div class="seccion-body">
             <div class="seccion-inner">
-                <div class="panel-prov-bar">
-                    <label>Proveedor</label>
-                    <select id="vencFiltroProveedor" class="panel-prov-sel" onchange="renderAlertasVencimiento()">
-                        <option value="todos">Todos los proveedores</option>
-                    </select>
-                </div>
                 <div class="alertas-grid" id="vencGrid"></div>
             </div>
         </div>
     </div>
+
+    <!-- ══ DIVISOR — ZONA DE INFORME ══ -->
+    <div class="zona-informe-divider">
+        <div class="zona-informe-divider-line"></div>
+        <div class="zona-informe-divider-label">
+            <span class="zona-informe-divider-icon">📊</span>
+            <span class="zona-informe-divider-text">Vista de Informe</span>
+        </div>
+        <div class="zona-informe-divider-line"></div>
+    </div>
+    <p class="zona-informe-hint" style="text-align:center;margin-bottom:12px;">
+        🔁 Las secciones dentro de esta zona se actualizan al aplicar los filtros de proveedor, mes, año o tipo de documento
+    </p>
+
+    <!-- ══ ZONA INFORME: Secciones 3-6 controladas por filtros ══ -->
+    <div class="zona-informe">
 
     <!-- ══ SECCIÓN 3: Filtros + Resumen (abierta) ══ -->
     <div class="seccion open" id="sec-filtros">
@@ -1551,12 +1764,6 @@
                         <div class="filtro-item filtro-item-sm">
                             <label class="filtro-label">🗓 Año</label>
                             <input type="number" id="filtroAño" value="2026" min="2020" max="2100" class="filtro-select">
-                        </div>
-                        <div class="filtro-item">
-                            <label class="filtro-label">🏢 Proveedor</label>
-                            <select id="filtroProveedor" class="filtro-select">
-                                <option value="todos">Todos los proveedores</option>
-                            </select>
                         </div>
                         <div class="filtro-item filtro-item-btn">
                             <button class="btn-filtrar-nuevo" onclick="aplicarFiltros()">
@@ -1614,6 +1821,40 @@
                     </div>
                 </div>
 
+                <!-- ══ CHARTS ══ -->
+                <div class="charts-row">
+
+                    <!-- Línea: Correctivos últimos 6 meses -->
+                    <div class="chart-card">
+                        <div class="chart-card-title" id="chartLineTitle">📈 Correctivos — últimos 6 meses</div>
+                        <div class="line-chart-wrap">
+                            <canvas id="chartLineCorrectivos"></canvas>
+                        </div>
+                        <!-- Detalle al hacer clic en un punto -->
+                        <div class="linea-detalle" id="lineaDetallePanel">
+                            <div class="linea-detalle-header">
+                                <span class="linea-detalle-mes" id="lineaDetalleMes"></span>
+                                <button class="linea-detalle-close" onclick="cerrarDetalleLinea()" title="Cerrar">✕</button>
+                            </div>
+                            <div class="linea-detalle-grid" id="lineaDetalleGrid"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gauge: Preoperacional hoy -->
+                    <div class="chart-card">
+                        <div class="chart-card-title">✅ Preoperacional hoy</div>
+                        <div class="gauge-wrap">
+                            <canvas id="chartGaugePreop"></canvas>
+                            <div class="gauge-center">
+                                <span class="gauge-pct" id="gaugePct">—%</span>
+                                <span class="gauge-sub" id="gaugeSub">cargando…</span>
+                            </div>
+                        </div>
+                        <div class="gauge-footer naranja" id="gaugeFooter">Cargando datos…</div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -1632,6 +1873,14 @@
         </button>
         <div class="seccion-body">
             <div class="seccion-inner">
+                <!-- Barras: cumplimiento por proveedor -->
+                <div class="chart-card" style="margin-bottom:18px">
+                    <div class="chart-card-title">📊 Cumplimiento por proveedor (%)</div>
+                    <div class="barras-chart-wrap" id="chartBarrasWrap">
+                        <canvas id="chartBarrasProveedores"></canvas>
+                    </div>
+                </div>
+
                 <!-- Mini-resumen tarjetas por proveedor -->
                 <div class="prov-summary-strip" id="provSummaryStrip"></div>
 
@@ -1775,6 +2024,8 @@
         </div>
     </div>
 
+    </div><!-- /zona-informe -->
+
 </div><!-- /container -->
 
 <!-- ══ MODAL DESCARGA MASIVA ══ -->
@@ -1870,6 +2121,14 @@
                         <span class="dm-check-label">
                             <strong>Reporte de vencimientos (CSV)</strong>
                             <small>Tabla con fechas de SOAT y tecnomecánica por vehículo</small>
+                        </span>
+                    </label>
+                    <label class="dm-check-item" style="grid-column:1/-1">
+                        <input type="checkbox" id="dTipoExcel" onchange="actualizarConteoDescarga()">
+                        <span class="dm-check-box"></span>
+                        <span class="dm-check-label">
+                            <strong>Reporte completo (Excel)</strong>
+                            <small>Estado, documentos y vencimientos de todos los vehículos filtrados</small>
                         </span>
                     </label>
                 </div>
@@ -2002,6 +2261,229 @@
     let _rechazarId     = null;
     let _rechazarData   = null;
 
+    /* ══ CHARTS ══ */
+    let _chartGauge  = null;
+    let _chartLinea  = null;
+    let _chartBarras = null;
+    let _lineaMeses  = [];   // [{mes, año}] paralelo a los puntos del chart
+
+    /* ── Línea: correctivos últimos 6 meses ── */
+    function actualizarChartLinea() {
+        const hoy        = new Date();
+        const provFiltro = document.getElementById('filtroGlobalProveedor')?.value || 'todos';
+        const vehicsFilt = provFiltro === 'todos'
+            ? flotaCompleta
+            : flotaCompleta.filter(v => (v.proveedor || 'Sin proveedor') === provFiltro);
+        const labels = [], datos = [];
+        _lineaMeses = [];
+        for (let i = 5; i >= 0; i--) {
+            const d   = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+            const mes = d.getMonth() + 1, año = d.getFullYear();
+            labels.push(MESES[mes].slice(0,3) + ' ' + String(año).slice(2));
+            _lineaMeses.push({ mes, año });
+            let cnt = 0;
+            vehicsFilt.forEach(v =>
+                (flotaHistoriales[v.id] || []).forEach(h => {
+                    if (h.mes === mes && h.año === año && h.pdf_mantenimiento_correctivo) cnt++;
+                })
+            );
+            datos.push(cnt);
+        }
+        cerrarDetalleLinea();
+
+        // Actualizar título del chart con proveedor activo
+        const titleEl = document.getElementById('chartLineTitle');
+        if (titleEl) titleEl.textContent = provFiltro === 'todos'
+            ? '📈 Correctivos — últimos 6 meses'
+            : `📈 Correctivos — ${provFiltro}`;
+
+        const ctx = document.getElementById('chartLineCorrectivos').getContext('2d');
+        if (_chartLinea) { _chartLinea.data.labels=labels; _chartLinea.data.datasets[0].data=datos; _chartLinea.update('active'); return; }
+        _chartLinea = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets: [{
+                label: 'Correctivos', data: datos,
+                borderColor: '#1a4bcc', backgroundColor: 'rgba(26,75,204,0.08)',
+                fill: true, tension: 0.4,
+                pointBackgroundColor: '#1a4bcc', pointRadius: 5, pointHoverRadius: 9,
+                pointHoverBackgroundColor: '#c0272d',
+                borderWidth: 2
+            }]},
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) mostrarDetalleLinea(elements[0].index);
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: c => ` ${c.raw} correctivo${c.raw!==1?'s':''}` }}
+                },
+                scales: {
+                    y: { beginAtZero:true, ticks:{ stepSize:1, font:{size:11}, color:'#8a94b0' }, grid:{color:'rgba(0,0,0,0.05)'} },
+                    x: { ticks:{ font:{size:11}, color:'#8a94b0' }, grid:{display:false} }
+                }
+            }
+        });
+    }
+
+    function mostrarDetalleLinea(idx) {
+        const { mes, año } = _lineaMeses[idx] || {};
+        if (!mes) return;
+        const provFiltro = document.getElementById('filtroGlobalProveedor')?.value || 'todos';
+        const vehicsFilt = provFiltro === 'todos'
+            ? flotaCompleta
+            : flotaCompleta.filter(v => (v.proveedor || 'Sin proveedor') === provFiltro);
+
+        const encontrados = [];
+        vehicsFilt.forEach(v => {
+            const h = (flotaHistoriales[v.id] || []).find(h => h.mes === mes && h.año === año && h.pdf_mantenimiento_correctivo);
+            if (h) encontrados.push({ placa: v.placa, proveedor: v.proveedor || 'Sin proveedor', ciudad: v.ciudad || '—' });
+        });
+
+        const panel  = document.getElementById('lineaDetallePanel');
+        const mesLbl = document.getElementById('lineaDetalleMes');
+        const grid   = document.getElementById('lineaDetalleGrid');
+
+        mesLbl.textContent = `🔨 Correctivos en ${MESES[mes]} ${año} — ${encontrados.length} vehículo${encontrados.length!==1?'s':''}`;
+        grid.innerHTML = encontrados.length === 0
+            ? `<div class="linea-detalle-empty">Sin correctivos registrados en este mes</div>`
+            : encontrados.map(e => `
+                <div class="linea-detalle-card">
+                    <div class="linea-detalle-placa">🚚 ${e.placa}</div>
+                    <div class="linea-detalle-prov">🏢 ${e.proveedor}</div>
+                    <div class="linea-detalle-prov">📍 ${e.ciudad}</div>
+                </div>`).join('');
+        panel.classList.add('open');
+    }
+
+    function cerrarDetalleLinea() {
+        const panel = document.getElementById('lineaDetallePanel');
+        if (panel) panel.classList.remove('open');
+    }
+
+    /* ── Barras horizontales: cumplimiento por proveedor ── */
+    function actualizarChartBarras(provs) {
+        if (!provs || !provs.length) return;
+        const labels = provs.map(([n]) => n.length > 22 ? n.slice(0,20)+'…' : n);
+        const datos  = provs.map(([,p]) => p.total > 0 ? Math.round((p.ok/p.total)*100) : 0);
+        const colors = datos.map(v => v>=80 ? '#0f9b6e' : v>=40 ? '#f59e0b' : '#c0272d');
+
+        const wrap = document.getElementById('chartBarrasWrap');
+        if (wrap) wrap.style.height = Math.max(140, provs.length * 42) + 'px';
+
+        const ctx = document.getElementById('chartBarrasProveedores').getContext('2d');
+        if (_chartBarras) {
+            _chartBarras.data.labels = labels;
+            _chartBarras.data.datasets[0].data   = datos;
+            _chartBarras.data.datasets[0].backgroundColor = colors;
+            _chartBarras.update('active'); return;
+        }
+        _chartBarras = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets: [{
+                data: datos, backgroundColor: colors,
+                borderRadius: 5, borderSkipped: false
+            }]},
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: c => ` ${c.raw}% cumplimiento` }}},
+                scales: {
+                    x: { beginAtZero:true, max:100,
+                         ticks:{ callback: v => v+'%', font:{size:11}, color:'#8a94b0' },
+                         grid:{ color:'rgba(0,0,0,0.05)' } },
+                    y: { ticks:{ font:{size:11, weight:'600'}, color:'#4a5068' }, grid:{display:false} }
+                }
+            }
+        });
+    }
+
+    /* ── Sparklines en tarjetas de proveedor ── */
+    function renderSparklines(provs) {
+        const hoy = new Date();
+        provs.forEach(([nombre]) => {
+            const id  = 'spark-' + nombre.replace(/[^a-z0-9]/gi,'_');
+            const cvs = document.getElementById(id);
+            if (!cvs) return;
+            const existing = Chart.getChart(cvs);
+            if (existing) existing.destroy();
+
+            const vehicsProv = flotaCompleta.filter(v => (v.proveedor||'Sin proveedor') === nombre);
+            const datos = [];
+            for (let i=5; i>=0; i--) {
+                const d = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+                const mes=d.getMonth()+1, año=d.getFullYear();
+                let ok=0;
+                vehicsProv.forEach(v => {
+                    const h = (flotaHistoriales[v.id]||[]).find(h=>h.mes===mes&&h.año===año);
+                    if (h && h.pdf_preoperacional && h.pdf_mantenimiento) ok++;
+                });
+                datos.push(vehicsProv.length > 0 ? Math.round(ok/vehicsProv.length*100) : 0);
+            }
+            new Chart(cvs.getContext('2d'), {
+                type: 'bar',
+                data: { labels:['','','','','',''], datasets:[{
+                    data: datos,
+                    backgroundColor: datos.map(v => v>=80?'rgba(15,155,110,0.75)':v>=40?'rgba(245,158,11,0.75)':'rgba(192,39,45,0.75)'),
+                    borderRadius:2, borderSkipped:false
+                }]},
+                options: {
+                    responsive:false, animation:false,
+                    plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+                    scales:{ x:{display:false}, y:{display:false, beginAtZero:true, max:100} }
+                }
+            });
+        });
+    }
+
+    async function actualizarGaugePreop() {
+        try {
+            const data = await _afetch(API_URL + '/admin/estadisticas').then(r => r.json());
+
+            const { cumplieron, vehiculos_activos, porcentaje } = data.preoperacional_hoy;
+            const pct = porcentaje || 0;
+
+            document.getElementById('gaugePct').textContent = pct + '%';
+            document.getElementById('gaugeSub').textContent = `${cumplieron} / ${vehiculos_activos} vehículos`;
+
+            const footer = document.getElementById('gaugeFooter');
+            let colorClass, msg;
+            if      (pct >= 80) { colorClass = 'verde';   msg = '✅ Cumplimiento alto'; }
+            else if (pct >= 50) { colorClass = 'naranja'; msg = '⚠️ Cumplimiento medio'; }
+            else                { colorClass = 'rojo';    msg = '🔴 Cumplimiento bajo'; }
+            footer.className    = `gauge-footer ${colorClass}`;
+            footer.textContent  = msg;
+
+            const colorGauge = pct >= 80 ? '#0f9b6e' : pct >= 50 ? '#f59e0b' : '#c0272d';
+            const ctx = document.getElementById('chartGaugePreop').getContext('2d');
+
+            if (_chartGauge) {
+                _chartGauge.data.datasets[0].data = [pct, 100 - pct];
+                _chartGauge.data.datasets[0].backgroundColor = [colorGauge, '#f0f2f8'];
+                _chartGauge.update('active');
+                return;
+            }
+            _chartGauge = new Chart(ctx, {
+                type: 'doughnut',
+                data: { datasets: [{
+                    data: [pct, 100 - pct],
+                    backgroundColor: [colorGauge, '#f0f2f8'],
+                    borderWidth: 0,
+                    circumference: 180,
+                    rotation: -90
+                }]},
+                options: {
+                    cutout: '72%',
+                    animation: { duration: 800, easing: 'easeInOutQuart' },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+        } catch(e) {
+            document.getElementById('gaugePct').textContent    = '—%';
+            document.getElementById('gaugeSub').textContent    = 'Sin datos';
+            document.getElementById('gaugeFooter').textContent = 'Error al cargar';
+        }
+    }
+
     /* ══ TOGGLE SECCIONES ══ */
     function toggleSeccion(id) {
         const sec = document.getElementById(id);
@@ -2034,7 +2516,6 @@
             document.getElementById('preop-notif-fecha').textContent = 'Hoy: ' + (data.fecha || '—');
             _preopRawVehiculos = data.vehiculos || [];
             document.getElementById('badgePreopHoy').textContent = _preopRawVehiculos.length;
-            _poblarSel('preopFiltroProveedor', _preopRawVehiculos, 'proveedor');
             _renderPreopFiltrado();
         } catch(e) {
             grid.innerHTML = '<div style="color:#9f1239;text-align:center;padding:24px;grid-column:1/-1;">❌ Error al cargar notificaciones</div>';
@@ -2043,7 +2524,7 @@
 
     function _renderPreopFiltrado() {
         const grid = document.getElementById('preopNotifGrid');
-        const prov = document.getElementById('preopFiltroProveedor')?.value || 'todos';
+        const prov = document.getElementById('filtroGlobalProveedor')?.value || 'todos';
         const lista = prov === 'todos'
             ? _preopRawVehiculos
             : _preopRawVehiculos.filter(v => (v.proveedor || 'Sin proveedor') === prov);
@@ -2218,7 +2699,6 @@
             const badge = document.getElementById('badgePendientes');
             badge.textContent = pendientes.length;
             badge.style.background = pendientes.length > 0 ? 'rgba(192,39,45,0.85)' : 'rgba(15,155,110,0.85)';
-            _poblarSel('pendFiltroProveedor', _pendRawVehiculos, 'proveedor');
             _renderPendFiltrado();
         } catch(e) {
             document.getElementById('pendingGrid').innerHTML = '<div class="no-pending">❌ Error al cargar pendientes</div>';
@@ -2227,7 +2707,7 @@
 
     function _renderPendFiltrado() {
         const grid = document.getElementById('pendingGrid');
-        const prov = document.getElementById('pendFiltroProveedor')?.value || 'todos';
+        const prov = document.getElementById('filtroGlobalProveedor')?.value || 'todos';
         const lista = prov === 'todos'
             ? _pendRawVehiculos
             : _pendRawVehiculos.filter(v => (v.proveedor || 'Sin proveedor') === prov);
@@ -2347,7 +2827,8 @@
             mapa[p] = (mapa[p] || 0) + 1;
         });
 
-        const sel = document.getElementById('filtroProveedor');
+        const sel = document.getElementById('filtroGlobalProveedor');
+        const anterior = sel?.value || 'todos';
         // Limpiar opciones previas (salvo "Todos")
         while (sel.options.length > 1) sel.remove(1);
 
@@ -2360,6 +2841,38 @@
                 opt.textContent = `${nombre}  (${count} vehículo${count !== 1 ? 's' : ''} activo${count !== 1 ? 's' : ''})`;
                 sel.appendChild(opt);
             });
+
+        // Restaurar selección anterior si aún existe
+        if ([...sel.options].some(o => o.value === anterior)) sel.value = anterior;
+
+        // Actualizar badge total
+        const total = flotaCompleta.length;
+        const fgTotal = document.getElementById('fgTotal');
+        if (fgTotal) fgTotal.textContent = `${total} vehículo${total !== 1 ? 's' : ''} en flota`;
+    }
+
+    /* ══ FILTRO GLOBAL POR PROVEEDOR ══ */
+    function aplicarFiltroGlobal(val) {
+        const sel   = document.getElementById('filtroGlobalProveedor');
+        const pill  = document.getElementById('fgPill');
+        const clear = document.getElementById('fgClear');
+        const badge = document.getElementById('fgTotal');
+        if (sel) sel.value = val;
+        const activo = val !== 'todos';
+        pill.textContent = activo ? val : '';
+        pill.classList.toggle('on', activo);
+        clear.classList.toggle('on', activo);
+        // Conteo filtrado
+        const count = flotaCompleta.filter(v => !activo || (v.proveedor || 'Sin proveedor') === val).length;
+        if (badge) badge.textContent = activo
+            ? `${count} vehículo${count !== 1 ? 's' : ''} — filtrado`
+            : `${flotaCompleta.length} vehículo${flotaCompleta.length !== 1 ? 's' : ''} en flota`;
+        // Repintar todos los paneles
+        _renderPreopFiltrado();
+        _renderPendFiltrado();
+        renderAlertasVencimiento();
+        aplicarFiltros();
+        actualizarChartLinea();
     }
 
     /* ══ FILTROS ══ */
@@ -2367,12 +2880,29 @@
         const tipo = document.getElementById('filtroTipo').value;
         const mes  = parseInt(document.getElementById('filtroMes').value);
         const año  = parseInt(document.getElementById('filtroAño').value);
-        const prov = document.getElementById('filtroProveedor').value;
+        const prov = document.getElementById('filtroGlobalProveedor')?.value || 'todos';
         const filas = [];
         todosVehiculos.forEach(v => {
             if (prov !== 'todos' && v.proveedor !== prov) return;
+
+            const mesInsc = v.mes_inscripcion || 1;
+            const añoInsc = v.año_inscripcion;
+
+            // Excluir vehículos que aún no existían en el período seleccionado
+            if (añoInsc) {
+                if (añoInsc > año) return;
+                if (mes > 0 && añoInsc === año && mesInsc > mes) return;
+            }
+
             const hist = todosHistoriales[v.id] || [];
-            const registros = hist.filter(h => (mes === 0 || h.mes === mes) && h.año === año);
+            const registros = hist.filter(h => {
+                if (h.año !== año) return false;
+                if (mes > 0) return h.mes === mes;
+                // "Todos los meses": no contar meses previos a la inscripción en el mismo año
+                if (añoInsc === año && h.mes < mesInsc) return false;
+                return true;
+            });
+
             if (registros.length === 0) filas.push({ v, h: null });
             else registros.forEach(h => filas.push({ v, h }));
         });
@@ -2633,9 +3163,10 @@
         // Strip cards
         if (strip) {
             strip.innerHTML = provs.map(([nombre, p]) => {
-                const pct  = p.total > 0 ? Math.round((p.ok/p.total)*100) : 0;
+                const pct   = p.total > 0 ? Math.round((p.ok/p.total)*100) : 0;
                 const color = pct >= 80 ? '#0f9b6e' : pct >= 40 ? '#d46b08' : '#c0272d';
                 const issues = p.preop + p.mant;
+                const sparkId = 'spark-' + nombre.replace(/[^a-z0-9]/gi,'_');
                 return `<div class="prov-strip-card">
                     <div class="prov-strip-icon">🏢</div>
                     <div class="prov-strip-body">
@@ -2645,15 +3176,12 @@
                             ${issues > 0 ? `<div class="prov-strip-stat"><div class="prov-strip-dot rojo"></div>${issues} pend.</div>` : ''}
                             ${p.corr > 0 ? `<div class="prov-strip-stat"><div class="prov-strip-dot naranja"></div>${p.corr} corr.</div>` : ''}
                         </div>
-                        <div class="prov-strip-bar-wrap">
-                            <div class="prov-strip-bar">
-                                <div class="prov-strip-bar-fill" style="width:${pct}%;background:${color}"></div>
-                            </div>
-                        </div>
                     </div>
+                    <canvas id="${sparkId}" class="prov-sparkline" width="72" height="34"></canvas>
                     <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.3em;font-weight:800;color:${color};min-width:38px;text-align:right">${pct}%</div>
                 </div>`;
             }).join('');
+            setTimeout(() => renderSparklines(provs), 0);
         }
 
         // Tabla
@@ -2687,6 +3215,8 @@
                 </td>
             </tr>`;
         }).join('');
+
+        actualizarChartBarras(provs);
     }
 
     function renderResumen(filas, tipo) {
@@ -2733,6 +3263,8 @@
             renderFlota();
             renderAlertas();
             renderAlertasVencimiento();
+            actualizarChartLinea();
+            actualizarGaugePreop();
         } catch(e) {
             document.getElementById('flotaContainer').innerHTML = '<div class="no-flota">❌ Error al cargar la flota</div>';
         }
@@ -2743,7 +3275,7 @@
         const grid    = document.getElementById('vencGrid');
         const badge   = document.getElementById('badgeVenc');
         const hoy     = new Date();
-        const provSel = document.getElementById('vencFiltroProveedor')?.value || 'todos';
+        const provSel = document.getElementById('filtroGlobalProveedor')?.value || 'todos';
 
         function calcDoc(fecha) {
             if (!fecha) return { dr: -9999, estado: 'sin' };
@@ -2765,12 +3297,6 @@
             })
             .filter(a => a.urgencia > 0)
             .sort((a, b) => b.urgencia - a.urgencia);
-
-        // Poblar select solo la primera vez (cuando no hay opciones aún)
-        const sel = document.getElementById('vencFiltroProveedor');
-        if (sel && sel.options.length <= 1) {
-            _poblarSel('vencFiltroProveedor', alertas.map(a => a.v), 'proveedor');
-        }
 
         // Aplicar filtro de proveedor
         const alertasFiltradas = provSel === 'todos'
@@ -3583,6 +4109,7 @@ function _recolectarArchivos() {
     const tipoCertAliado = document.getElementById('dTipoCertAliado').checked;
     const tipoCertLatin  = document.getElementById('dTipoCertLatin').checked;
     const tipoVenc       = document.getElementById('dTipoReporteVenc').checked;
+    const tipoExcel      = document.getElementById('dTipoExcel').checked;
     const prov      = document.getElementById('dProvFiltro').value;
     const estado    = document.getElementById('dEstadoFiltro').value;
     const mes       = parseInt(document.getElementById('dMes').value);
@@ -3617,23 +4144,31 @@ function _recolectarArchivos() {
             if (tipoCorr  && h.pdf_mantenimiento_correctivo) archivos.push({ ruta: h.pdf_mantenimiento_correctivo, carpeta: cap('Correctivo'),     nombre: `${pl}_Corr_${ml}.pdf` });
         });
     });
-    // Reporte de vencimientos: virtual, se genera en ejecutarDescargaMasiva
+    // Reporte de vencimientos CSV: virtual, se genera en ejecutarDescargaMasiva
     if (tipoVenc) {
-        const carpetaVenc = org === 'tipo' ? 'Reportes' : 'Reportes';
-        archivos.push({ _esReporteVenc: true, carpeta: carpetaVenc, nombre: 'Reporte_Vencimientos.csv', _vehiculos: vehiculos });
+        archivos.push({ _esReporteVenc: true, carpeta: 'Reportes', nombre: 'Reporte_Vencimientos.csv', _vehiculos: vehiculos });
+    }
+    // Reporte completo Excel: se descarga desde el backend
+    if (tipoExcel) {
+        archivos.push({ _esExcel: true, carpeta: 'Reportes', nombre: 'Reporte_Completo.xlsx', _prov: prov, _estado: estado });
     }
     return archivos;
 }
 
 function actualizarConteoDescarga() {
     const a      = _recolectarArchivos();
-    const pdfs   = a.filter(x => !x._esReporteVenc).length;
-    const hayVenc= a.some(x => x._esReporteVenc);
-    const total  = a.length;
+    const pdfs     = a.filter(x => !x._esReporteVenc && !x._esExcel).length;
+    const hayVenc  = a.some(x => x._esReporteVenc);
+    const hayExcel = a.some(x => x._esExcel);
+    const total    = a.length;
     document.getElementById('dmCounterNum').textContent = total;
+    const partes = [];
+    if (pdfs > 0)   partes.push(`${pdfs} archivo${pdfs!==1?'s':''} PDF`);
+    if (hayVenc)    partes.push('1 reporte CSV');
+    if (hayExcel)   partes.push('1 reporte Excel');
     document.getElementById('dmCounterLabel').textContent = total === 0
         ? 'No hay archivos con los filtros seleccionados'
-        : `${pdfs > 0 ? `${pdfs} archivo${pdfs!==1?'s':''} PDF` : ''}${pdfs>0&&hayVenc?' + ':''}${hayVenc?'1 reporte CSV':''} · Se empaquetarán en un único ZIP`;
+        : partes.join(' + ') + ' · Se empaquetarán en un único ZIP';
     document.getElementById('dmAviso').style.display = pdfs > 15 ? 'block' : 'none';
     document.getElementById('btnConfirmarDescarga').disabled = total === 0;
     const hayMens = document.getElementById('dTipoPreop').checked || document.getElementById('dTipoMant').checked || document.getElementById('dTipoCorr').checked;
@@ -3682,6 +4217,17 @@ async function ejecutarDescargaMasiva() {
                 const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8' });
                 const carpeta = a.carpeta || 'Reportes';
                 zip.folder(carpeta || 'Reportes').file(a.nombre, csvBlob);
+            } catch(e) { errores.push(a.nombre); }
+        } else if (a._esExcel) {
+            try {
+                const params = new URLSearchParams();
+                if (a._prov  && a._prov  !== 'todos') params.set('proveedor', a._prov);
+                if (a._estado && a._estado !== 'todos') params.set('estado', a._estado);
+                const r = await fetch(`${API_URL}/admin/reporte-vehiculos?${params}`, {
+                    headers: { 'Authorization': 'Bearer ' + (JSON.parse(localStorage.getItem('usuario') || '{}').token || '') }
+                });
+                if (!r.ok) throw new Error(r.status);
+                zip.folder(a.carpeta).file(a.nombre, await r.blob());
             } catch(e) { errores.push(a.nombre); }
         } else {
             try {

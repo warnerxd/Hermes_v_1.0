@@ -342,6 +342,7 @@
             font-weight: 700;
             color: var(--gris-texto);
             letter-spacing: 0.04em;
+            white-space: nowrap;
         }
 
         /* ══ SEMÁFORO ══ */
@@ -998,8 +999,9 @@
 
     <!-- ══ NAV ══ -->
     <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='dashboard.html'">🏠 Mi Panel</button>
         <button class="nav-btn" onclick="window.location.href='crear_vehiculo.html'">📝 Registrar</button>
-        <button class="nav-btn active" onclick="window.location.href='ver_vehiculos.html'">📋 Ver Mis Vehículos</button>
+        <button class="nav-btn active" onclick="window.location.href='ver_vehiculos.html'">📋 Mis Vehículos</button>
         <button class="nav-btn" onclick="window.location.href='historial_vehiculos.html'">📅 Historial</button>
     </div>
 
@@ -1025,19 +1027,16 @@
             <button class="modal-close" onclick="cerrarEditar()">✕</button>
         </div>
         <div class="modal-body">
-            <div class="modal-aviso">
-                ⚠️ Al guardar los cambios el vehículo volverá a estado <strong>Pendiente</strong> y el administrador deberá aprobarlo nuevamente.
-            </div>
             <div class="modal-alert-ok" id="editAlertOk"></div>
 
             <div class="mfrow">
                 <div class="mfg">
                     <label>Placa *</label>
-                    <input id="ePlaca" type="text" placeholder="ABC-123">
+                    <input id="ePlaca" type="text" placeholder="ABC-123" readonly style="background:#f0f2f7;cursor:not-allowed;color:#8a94b0;">
                 </div>
                 <div class="mfg">
                     <label>Tonelaje *</label>
-                    <select id="eTonelaje">
+                    <select id="eTonelaje" disabled style="background:#f0f2f7;cursor:not-allowed;color:#8a94b0;opacity:1;">
                         <option value="">-- Seleccionar --</option>
                         <option>Carry (0.5 - 1.5 ton)</option>
                         <option>NHR (1.5 - 3.0 ton)</option>
@@ -1052,18 +1051,18 @@
             <div class="mfrow">
                 <div class="mfg">
                     <label>Marca *</label>
-                    <input id="eMarca" type="text" placeholder="Volvo, Scania...">
+                    <input id="eMarca" type="text" placeholder="Volvo, Scania..." readonly style="background:#f0f2f7;cursor:not-allowed;color:#8a94b0;">
                 </div>
                 <div class="mfg">
                     <label>Año Modelo <span style="color:#b0b8cc;font-weight:400">(opcional)</span></label>
-                    <input id="eModelo" type="number" min="1990" max="2100" placeholder="Ej: 2020">
+                    <input id="eModelo" type="number" min="1990" max="2100" placeholder="Ej: 2020" readonly style="background:#f0f2f7;cursor:not-allowed;color:#8a94b0;">
                 </div>
             </div>
 
             <div class="mfrow">
                 <div class="mfg">
                     <label>Ciudad *</label>
-                    <select id="eCiudad">
+                    <select id="eCiudad" disabled style="background:#f0f2f7;cursor:not-allowed;color:#8a94b0;opacity:1;">
                         <option value="">-- Seleccionar --</option>
                         <optgroup label="Principales">
                             <option>Bogotá</option><option>Medellín</option><option>Cali</option>
@@ -1085,7 +1084,7 @@
                 </div>
                 <div class="mfg">
                     <label>Cédula dueño <span style="color:#b0b8cc;font-weight:400">(opcional)</span></label>
-                    <input id="eCedula" type="text" placeholder="1234567890">
+                    <input id="eCedula" type="text" placeholder="1234567890" readonly style="background:#f0f2f7;cursor:not-allowed;color:#8a94b0;">
                 </div>
             </div>
 
@@ -1143,7 +1142,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-guardar" id="btnGuardar" onclick="guardarEdicion()">💾 Guardar y solicitar aprobación</button>
+            <button class="btn-guardar" id="btnGuardar" onclick="guardarEdicion()">💾 Actualizar documentos</button>
             <button class="btn-cancelar" onclick="cerrarEditar()">Cancelar</button>
         </div>
     </div>
@@ -1390,7 +1389,11 @@
         document.getElementById('eCiudad').value = v.ciudad || '';
         document.getElementById('eSoat').value   = v.soat          || '';
         document.getElementById('eTecno').value  = v.tecnomecanica || '';
-        ['eAliado','eLatin','eNit','eSoatPdf','eTecnoPdf'].forEach(id => document.getElementById(id).value = '');
+        ['eAliado','eLatin','eNit','eSoatPdf','eTecnoPdf'].forEach(id => {
+            document.getElementById(id).value = '';
+            const ind = document.getElementById('ind-' + id);
+            if (ind) ind.classList.remove('visible');
+        });
 
         document.getElementById('eAliadoActual').textContent = v.pdf_certificado_aliado ? '✔ Ya tiene adjunto' : '';
         document.getElementById('eLatinActual').textContent  = v.pdf_certificado_latin  ? '✔ Ya tiene adjunto' : '';
@@ -1436,7 +1439,7 @@
             if (data.error) {
                 alert('❌ ' + data.error);
                 btn.disabled = false;
-                btn.textContent = '💾 Guardar y solicitar aprobación';
+                btn.textContent = '💾 Actualizar documentos';
                 return;
             }
 
@@ -1457,7 +1460,7 @@
             }
 
             const alertOk = document.getElementById('editAlertOk');
-            alertOk.textContent = '✅ Cambios guardados. El vehículo quedó en estado Pendiente hasta que el admin lo apruebe.';
+            alertOk.textContent = '✅ Documentos actualizados correctamente.';
             alertOk.style.display = 'block';
             btn.textContent = '✔ Guardado';
 
@@ -1465,13 +1468,13 @@
                 cerrarEditar();
                 cargarVehiculos();
                 btn.disabled = false;
-                btn.textContent = '💾 Guardar y solicitar aprobación';
+                btn.textContent = '💾 Actualizar documentos';
             }, 2200);
 
         } catch(e) {
             alert('❌ Error al guardar');
             btn.disabled = false;
-            btn.textContent = '💾 Guardar y solicitar aprobación';
+            btn.textContent = '💾 Actualizar documentos';
         }
     }
 
@@ -2008,6 +2011,52 @@ if ('serviceWorker' in navigator) {
     document.getElementById('tutOverlay').classList.remove('active');
     document.getElementById('tutFab').classList.remove('open');
   }
+</script>
+
+<style>
+.file-adjunto-ok {
+    display: none; align-items: center; gap: 6px;
+    margin-top: 6px; padding: 6px 12px;
+    background: rgba(15,155,110,0.10);
+    border: 1.5px solid rgba(15,155,110,0.28);
+    border-radius: 8px; font-size: 0.78em;
+    font-weight: 700; color: #065f46;
+    animation: fadeInCheck .25s ease;
+}
+.file-adjunto-ok.visible { display: flex; }
+.file-adjunto-ok .fa-nombre {
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 200px;
+    font-weight: 600; color: #0a6b50;
+}
+@keyframes fadeInCheck { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
+</style>
+
+<script>
+/* ══ INDICADOR ARCHIVO ADJUNTO — modal edición ══ */
+(function() {
+    const IDS = ['eSoatPdf','eTecnoPdf','eAliado','eLatin','eNit'];
+    IDS.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        const ind = document.createElement('div');
+        ind.className = 'file-adjunto-ok';
+        ind.id = 'ind-' + id;
+        ind.innerHTML = '✅ <span class="fa-nombre"></span>';
+        input.insertAdjacentElement('afterend', ind);
+        input.addEventListener('change', () => {
+            if (input.files && input.files[0]) {
+                ind.querySelector('.fa-nombre').textContent = input.files[0].name;
+                ind.classList.add('visible');
+            } else {
+                ind.classList.remove('visible');
+            }
+        });
+    });
+})();
+
+/* Resetear indicadores al abrir modal de edición */
+const _origAbrirEditar = window.abrirEditar;
 </script>
 </body>
 </html>

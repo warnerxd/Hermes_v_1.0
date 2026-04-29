@@ -12,7 +12,7 @@ import shutil
 load_dotenv()
 from sqlalchemy.orm import Session
 from database import engine, get_db, Base
-from models import UsuarioDB, VehiculoDB, ProveedorDB, HistorialVehiculoDB, TokenRecuperacionDB, PreoperacionalDiarioDB, HistorialEstadoVehiculoDB
+from models import UsuarioDB, VehiculoDB, ProveedorDB, HistorialVehiculoDB, TokenRecuperacionDB, PreoperacionalDiarioDB, HistorialEstadoVehiculoDB, AuditoriaDB
 from datetime import datetime, timedelta, date
 from zoneinfo import ZoneInfo
 
@@ -624,34 +624,28 @@ def obtener_vehiculos_pendientes(db: Session = Depends(get_db), _: dict = Depend
     return {"total": len(resultado), "vehiculos": resultado}
 
 @app.put("/vehiculos/{vehiculo_id}/activar")
-def activar_vehiculo(vehiculo_id: int, usuario_id: int = 0, db: Session = Depends(get_db), _: dict = Depends(get_admin_actual)):
+def activar_vehiculo(vehiculo_id: int, usuario_id: int = 0, db: Session = Depends(get_db), admin_payload: dict = Depends(get_admin_actual)):
     v = db.query(VehiculoDB).filter(VehiculoDB.id == vehiculo_id).first()
     if not v: return {"error": "Vehículo no encontrado"}
     ahora = datetime.now(ZoneInfo("America/Bogota")).replace(tzinfo=None)
+    admin_id = int(admin_payload.get("sub", 0)) or None
     v.activo = 1
     v.fecha_desactivacion = None
-    db.add(HistorialEstadoVehiculoDB(
-        vehiculo_id=vehiculo_id,
-        usuario_id=usuario_id or None,
-        accion="activado",
-        fecha=ahora
-    ))
+    db.add(HistorialEstadoVehiculoDB(vehiculo_id=vehiculo_id, usuario_id=admin_id, accion="activado", fecha=ahora))
+    db.add(AuditoriaDB(vehiculo_id=vehiculo_id, admin_id=admin_id, accion="aprobado", fecha=ahora))
     db.commit(); db.refresh(v)
     return {"mensaje": "Vehículo activado", "id": v.id, "placa": v.placa, "activo": v.activo}
 
 @app.put("/vehiculos/{vehiculo_id}/desactivar")
-def desactivar_vehiculo(vehiculo_id: int, usuario_id: int = 0, db: Session = Depends(get_db), _: dict = Depends(get_admin_actual)):
+def desactivar_vehiculo(vehiculo_id: int, usuario_id: int = 0, db: Session = Depends(get_db), admin_payload: dict = Depends(get_admin_actual)):
     v = db.query(VehiculoDB).filter(VehiculoDB.id == vehiculo_id).first()
     if not v: return {"error": "Vehículo no encontrado"}
     ahora = datetime.now(ZoneInfo("America/Bogota")).replace(tzinfo=None)
+    admin_id = int(admin_payload.get("sub", 0)) or None
     v.activo = 0
     v.fecha_desactivacion = ahora
-    db.add(HistorialEstadoVehiculoDB(
-        vehiculo_id=vehiculo_id,
-        usuario_id=usuario_id or None,
-        accion="desactivado",
-        fecha=ahora
-    ))
+    db.add(HistorialEstadoVehiculoDB(vehiculo_id=vehiculo_id, usuario_id=admin_id, accion="desactivado", fecha=ahora))
+    db.add(AuditoriaDB(vehiculo_id=vehiculo_id, admin_id=admin_id, accion="desactivado", fecha=ahora))
     db.commit(); db.refresh(v)
     return {
         "mensaje": "Vehículo desactivado", "id": v.id, "placa": v.placa, "activo": v.activo,
@@ -677,13 +671,16 @@ class MotivoRechazo(BaseModel):
     motivo: str
 
 @app.put("/vehiculos/{vehiculo_id}/rechazar")
-def rechazar_vehiculo(vehiculo_id: int, body: MotivoRechazo, db: Session = Depends(get_db), _: dict = Depends(get_admin_actual)):
+def rechazar_vehiculo(vehiculo_id: int, body: MotivoRechazo, db: Session = Depends(get_db), admin_payload: dict = Depends(get_admin_actual)):
     """Rechazar vehículo con motivo — queda activo=-1 y conserva sus datos"""
     v = db.query(VehiculoDB).filter(VehiculoDB.id == vehiculo_id).first()
     if not v:
         return {"error": "Vehículo no encontrado"}
+    admin_id = int(admin_payload.get("sub", 0)) or None
+    ahora = datetime.now(ZoneInfo("America/Bogota")).replace(tzinfo=None)
     v.activo = -1
     v.motivo_rechazo = body.motivo.strip()
+    db.add(AuditoriaDB(vehiculo_id=vehiculo_id, admin_id=admin_id, accion="rechazado", detalle=body.motivo.strip(), fecha=ahora))
     db.commit(); db.refresh(v)
     return {"mensaje": "Vehículo rechazado", "id": v.id, "placa": v.placa,
             "activo": v.activo, "motivo_rechazo": v.motivo_rechazo}
@@ -717,6 +714,243 @@ def soat_alertas(db: Session = Depends(get_db), _: dict = Depends(get_admin_actu
             })
     return {"total": len(alertas), "alertas": alertas}
 
+@app.get("/admin/estadisticas")
+def estadisticas(db: Session = Depends(get_db), _: dict = Depends(get_admin_actual)):
+    """Métricas generales del dashboard admin."""
+    from datetime import timedelta
+    hoy = hoy_colombia()
+    en_30_dias = hoy + timedelta(days=30)
+
+    total      = db.query(VehiculoDB).count()
+    activos    = db.query(VehiculoDB).filter(VehiculoDB.activo == 1).count()
+    pendientes = db.query(VehiculoDB).filter(VehiculoDB.activo == 0).count()
+    rechazados = db.query(VehiculoDB).filter(VehiculoDB.activo == -1).count()
+
+    soat_vencidos    = soat_por_vencer    = 0
+    tecno_vencidos   = tecno_por_vencer   = 0
+
+    for v in db.query(VehiculoDB).filter(VehiculoDB.activo == 1).all():
+        # SOAT
+        if v.soat is None:
+            soat_vencidos += 1
+        else:
+            expira_soat = v.soat + timedelta(days=365)
+            if expira_soat < hoy:
+                soat_vencidos += 1
+            elif expira_soat <= en_30_dias:
+                soat_por_vencer += 1
+        # Tecnomecánica
+        if v.tecnomecanica is None:
+            tecno_vencidos += 1
+        else:
+            expira_tecno = v.tecnomecanica + timedelta(days=365)
+            if expira_tecno < hoy:
+                tecno_vencidos += 1
+            elif expira_tecno <= en_30_dias:
+                tecno_por_vencer += 1
+
+    preop_hoy  = db.query(PreoperacionalDiarioDB).filter(PreoperacionalDiarioDB.fecha == hoy).count()
+    porcentaje = round(preop_hoy / activos * 100, 1) if activos > 0 else 0
+
+    return {
+        "vehiculos": {
+            "total": total,
+            "activos": activos,
+            "pendientes": pendientes,
+            "rechazados": rechazados
+        },
+        "documentos": {
+            "soat_vencidos": soat_vencidos,
+            "soat_por_vencer_30d": soat_por_vencer,
+            "tecnomecanica_vencidos": tecno_vencidos,
+            "tecnomecanica_por_vencer_30d": tecno_por_vencer
+        },
+        "preoperacional_hoy": {
+            "vehiculos_activos": activos,
+            "cumplieron": preop_hoy,
+            "porcentaje": porcentaje
+        },
+        "proveedores": {
+            "total": db.query(ProveedorDB).count()
+        },
+        "fecha": hoy.isoformat()
+    }
+
+
+@app.get("/admin/reporte-vehiculos")
+def reporte_vehiculos_excel(
+    proveedor: Optional[str] = None,
+    estado: Optional[str] = None,
+    db: Session = Depends(get_db),
+    _: dict = Depends(get_admin_actual)
+):
+    """Genera y descarga un Excel con todos los vehículos y su estado documental."""
+    from io import BytesIO
+    from datetime import timedelta
+    from fastapi.responses import StreamingResponse
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    query = db.query(VehiculoDB)
+    if proveedor and proveedor != "todos":
+        query = query.filter(VehiculoDB.proveedor == proveedor)
+    if estado == "activo":
+        query = query.filter(VehiculoDB.activo == 1)
+    elif estado == "pendiente":
+        query = query.filter(VehiculoDB.activo == 0)
+    elif estado == "rechazado":
+        query = query.filter(VehiculoDB.activo == -1)
+    vehiculos = query.order_by(VehiculoDB.proveedor, VehiculoDB.placa).all()
+
+    hoy = hoy_colombia()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Vehículos"
+
+    # Estilos
+    azul       = PatternFill("solid", fgColor="1A4BCC")
+    verde_fill = PatternFill("solid", fgColor="D6F5E3")
+    rojo_fill  = PatternFill("solid", fgColor="FFE0E0")
+    amarillo   = PatternFill("solid", fgColor="FFF9C4")
+    borde = Border(
+        left=Side(style="thin", color="CCCCCC"), right=Side(style="thin", color="CCCCCC"),
+        top=Side(style="thin", color="CCCCCC"),  bottom=Side(style="thin", color="CCCCCC")
+    )
+
+    encabezados = [
+        "Placa", "Proveedor", "Tonelaje", "Marca", "Modelo", "Ciudad", "Cédula",
+        "Estado", "Venc. SOAT", "Estado SOAT", "Venc. Tecno.", "Estado Tecno.",
+        "Cert. Aliado", "Cert. Latin", "NIT", "PDF SOAT", "PDF Tecno.",
+        "Fecha Registro"
+    ]
+
+    ws.row_dimensions[1].height = 22
+    for col, titulo in enumerate(encabezados, 1):
+        c = ws.cell(row=1, column=col, value=titulo)
+        c.font      = Font(bold=True, color="FFFFFF", size=10)
+        c.fill      = azul
+        c.alignment = Alignment(horizontal="center", vertical="center")
+        c.border    = borde
+
+    def estado_doc(fecha_doc):
+        if fecha_doc is None:
+            return "Sin registrar"
+        expira = fecha_doc + timedelta(days=365)
+        if expira < hoy:
+            return "Vencido"
+        if expira <= hoy + timedelta(days=30):
+            return f"Vence en {(expira - hoy).days}d"
+        return "Vigente"
+
+    estado_label = {1: "Activo", 0: "Pendiente", -1: "Rechazado"}
+
+    for fila, v in enumerate(vehiculos, 2):
+        u = db.query(UsuarioDB).filter(UsuarioDB.id == v.usuario_id).first()
+        est_soat  = estado_doc(v.soat)
+        est_tecno = estado_doc(v.tecnomecanica)
+        valores = [
+            v.placa, v.proveedor or (u.proveedor if u else "—"),
+            v.tonelaje, v.marca or "—", v.modelo or "—", v.ciudad or "—", v.cedula or "—",
+            estado_label.get(v.activo, "—"),
+            v.soat.isoformat() if v.soat else "—", est_soat,
+            v.tecnomecanica.isoformat() if v.tecnomecanica else "—", est_tecno,
+            "✓" if v.pdf_certificado_aliado else "—",
+            "✓" if v.pdf_certificado_latin  else "—",
+            "✓" if v.pdf_nit                else "—",
+            "✓" if v.pdf_soat               else "—",
+            "✓" if v.pdf_tecnomecanica      else "—",
+            u.email if u else "—"
+        ]
+        for col, val in enumerate(valores, 1):
+            c = ws.cell(row=fila, column=col, value=val)
+            c.border    = borde
+            c.alignment = Alignment(horizontal="center", vertical="center")
+            # Color por estado SOAT (col 10) y Tecno (col 12)
+            if col == 10 or col == 12:
+                if val == "Vencido":          c.fill = rojo_fill
+                elif val.startswith("Vence"): c.fill = amarillo
+                elif val == "Vigente":        c.fill = verde_fill
+            if col == 8:
+                if v.activo == 1:  c.fill = verde_fill
+                elif v.activo == -1: c.fill = rojo_fill
+
+    for col in range(1, len(encabezados) + 1):
+        max_len = max((len(str(ws.cell(r, col).value or "")) for r in range(1, len(vehiculos) + 2)), default=8)
+        ws.column_dimensions[get_column_letter(col)].width = min(max_len + 4, 30)
+
+    ws.freeze_panes = "A2"
+
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    nombre = f"reporte_vehiculos_{hoy.isoformat()}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={nombre}"}
+    )
+
+
+@app.get("/admin/auditoria")
+def obtener_auditoria(
+    vehiculo_id: Optional[int] = None,
+    accion: Optional[str] = None,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    _: dict = Depends(get_admin_actual)
+):
+    """Historial completo de acciones admin sobre vehículos."""
+    query = db.query(AuditoriaDB)
+    if vehiculo_id:
+        query = query.filter(AuditoriaDB.vehiculo_id == vehiculo_id)
+    if accion:
+        query = query.filter(AuditoriaDB.accion == accion)
+    registros = query.order_by(AuditoriaDB.fecha.desc()).limit(limit).all()
+    return {
+        "total": len(registros),
+        "registros": [
+            {
+                "id": r.id,
+                "vehiculo_id": r.vehiculo_id,
+                "placa": r.vehiculo.placa if r.vehiculo else "—",
+                "admin": r.admin.nombre or r.admin.email if r.admin else "Sistema",
+                "accion": r.accion,
+                "detalle": r.detalle,
+                "fecha": r.fecha.isoformat()
+            }
+            for r in registros
+        ]
+    }
+
+
+@app.get("/vehiculos/{vehiculo_id}/auditoria")
+def auditoria_vehiculo(vehiculo_id: int, db: Session = Depends(get_db), _: dict = Depends(get_admin_actual)):
+    """Historial de auditoría de un vehículo específico."""
+    v = db.query(VehiculoDB).filter(VehiculoDB.id == vehiculo_id).first()
+    if not v:
+        return {"error": "Vehículo no encontrado"}
+    registros = db.query(AuditoriaDB).filter(
+        AuditoriaDB.vehiculo_id == vehiculo_id
+    ).order_by(AuditoriaDB.fecha.desc()).all()
+    return {
+        "vehiculo_id": vehiculo_id,
+        "placa": v.placa,
+        "total": len(registros),
+        "registros": [
+            {
+                "id": r.id,
+                "admin": r.admin.nombre or r.admin.email if r.admin else "Sistema",
+                "accion": r.accion,
+                "detalle": r.detalle,
+                "fecha": r.fecha.isoformat()
+            }
+            for r in registros
+        ]
+    }
+
+
 @app.delete("/vehiculos/{vehiculo_id}")
 def eliminar_vehiculo(vehiculo_id: int, usuario_id: int, db: Session = Depends(get_db)):
     """Eliminar un vehículo — solo admin"""
@@ -748,14 +982,13 @@ def actualizar_vehiculo(vehiculo_id: int, vehiculo: CrearVehiculo, db: Session =
     db_vehiculo.placa = vehiculo.placa.upper(); db_vehiculo.tonelaje = vehiculo.tonelaje
     db_vehiculo.marca = vehiculo.marca; db_vehiculo.modelo = vehiculo.modelo
     db_vehiculo.ciudad = vehiculo.ciudad; db_vehiculo.cedula = vehiculo.cedula
-    db_vehiculo.activo = 0
     if vehiculo.soat is not None: db_vehiculo.soat = vehiculo.soat
     if vehiculo.tecnomecanica is not None: db_vehiculo.tecnomecanica = vehiculo.tecnomecanica
     if vehiculo.mes_inscripcion is not None: db_vehiculo.mes_inscripcion = vehiculo.mes_inscripcion
     if vehiculo.año_inscripcion is not None: db_vehiculo.año_inscripcion = vehiculo.año_inscripcion
     db.commit(); db.refresh(db_vehiculo)
     u = db.query(UsuarioDB).filter(UsuarioDB.id == db_vehiculo.usuario_id).first()
-    return {"mensaje": "Actualizado. Pendiente de aprobación.", "vehiculo": {
+    return {"mensaje": "Documentos actualizados correctamente.", "vehiculo": {
         "id": db_vehiculo.id, "placa": db_vehiculo.placa, "activo": db_vehiculo.activo,
         "proveedor": db_vehiculo.proveedor or (u.proveedor if u else "")
     }}
@@ -1363,7 +1596,7 @@ def servir_deprisa():
 @app.get("/{filename}")
 def servir_pagina(filename: str):
     """Servir archivos HTML específicos - Colocado al FINAL para no interferir con endpoints de API"""
-    archivos_permitidos = ["login.html", "crear_vehiculo.html", "ver_vehiculos.html", "historial_vehiculos.html", "index.html", "recuperar_contrasena.html", "admin.html","registro.html","recuperar_contrasena.html"]
+    archivos_permitidos = ["login.html", "crear_vehiculo.html", "ver_vehiculos.html", "historial_vehiculos.html", "index.html", "recuperar_contrasena.html", "admin.html", "registro.html", "dashboard.html"]
     
     if filename not in archivos_permitidos:
         return {"error": "Página no encontrada"}

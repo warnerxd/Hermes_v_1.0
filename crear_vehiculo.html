@@ -261,6 +261,29 @@
             letter-spacing: 0.02em;
         }
 
+        /* ══ INDICADOR DE ARCHIVO ADJUNTO ══ */
+        .file-adjunto-ok {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 6px 12px;
+            background: rgba(15,155,110,0.10);
+            border: 1.5px solid rgba(15,155,110,0.28);
+            border-radius: 8px;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #065f46;
+            animation: fadeIn .25s ease;
+        }
+        .file-adjunto-ok.visible { display: flex; }
+        .file-adjunto-ok .fa-nombre {
+            overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; max-width: 220px;
+            font-weight: 600; color: #0a6b50;
+        }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
+
         /* ══ SUBMIT ══ */
         .btn-submit {
             width: 100%;
@@ -830,6 +853,24 @@
     document.getElementById('tutOverlay').classList.remove('active');
     document.getElementById('tutFab').classList.remove('open');
   }
+</script>
+
+<script>
+/* ══ INDICADOR ARCHIVO ADJUNTO — aplica a todos los file inputs ══ */
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    const ind = document.createElement('div');
+    ind.className = 'file-adjunto-ok';
+    ind.innerHTML = '✅ <span class="fa-nombre"></span>';
+    input.insertAdjacentElement('afterend', ind);
+    input.addEventListener('change', () => {
+        if (input.files && input.files[0]) {
+            ind.querySelector('.fa-nombre').textContent = input.files[0].name;
+            ind.classList.add('visible');
+        } else {
+            ind.classList.remove('visible');
+        }
+    });
+});
 </script>
 </body>
 </html>

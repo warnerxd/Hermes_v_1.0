@@ -637,7 +637,7 @@
                 setTimeout(() => {
                     window.location.href = rolUsuario === 'admin'
                         ? 'admin.html'
-                        : 'ver_vehiculos.html';
+                        : 'dashboard.html';
                 }, 900);
             })
             .catch(() => {
@@ -680,7 +680,7 @@
             const u = localStorage.getItem('usuario');
             if (u) {
                 const usuario = JSON.parse(u);
-                window.location.href = usuario.rol === 'admin' ? 'admin.html' : 'ver_vehiculos.html';
+                window.location.href = usuario.rol === 'admin' ? 'admin.html' : 'dashboard.html';
             }
         });
     </script>
